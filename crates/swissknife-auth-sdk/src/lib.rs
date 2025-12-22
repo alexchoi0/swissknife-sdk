@@ -86,6 +86,9 @@ pub mod ldap;
 #[cfg(feature = "scim")]
 pub mod scim;
 
+#[cfg(feature = "rippling")]
+pub mod rippling;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -36,7 +36,7 @@ scim = []
 enterprise-sso = ["saml", "ldap", "scim"]
 
 # Provider bundle
-providers = ["auth0", "firebase-auth", "okta", "cognito", "keycloak", "supabase", "clerk"]
+providers = ["auth0", "firebase-auth", "okta", "cognito", "keycloak", "supabase", "clerk", "rippling"]
 auth0 = ["oauth2", "jwt"]
 firebase-auth = ["jwt"]
 okta = ["oauth2", "jwt"]
@@ -44,6 +44,7 @@ cognito = ["oauth2", "jwt"]
 keycloak = ["oauth2", "jwt"]
 supabase = ["jwt"]
 clerk = ["jwt"]
+rippling = ["oauth2"]
 
 # Social login bundle
 social = ["google", "apple", "github", "microsoft", "facebook", "twitter-auth"]

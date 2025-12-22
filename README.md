@@ -21,4 +21,4 @@ swissknife-social-sdk = { git = "https://github.com/alexchoi0/swissknife-sdk" }
 
 ## License
 
-MIT
+Licensed under either of Apache License, Version 2.0 or MIT license at your option.

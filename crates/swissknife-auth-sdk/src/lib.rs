@@ -89,7 +89,47 @@ pub mod scim;
 #[cfg(feature = "rippling")]
 pub mod rippling;
 
+use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+
+#[async_trait]
+pub trait OAuthProvider: Send + Sync {
+    fn authorization_url(&self, state: &str) -> Result<String>;
+    async fn exchange_code(&self, code: &str) -> Result<TokenResponse>;
+    async fn refresh_token(&self, refresh_token: &str) -> Result<TokenResponse>;
+    async fn get_user(&self, access_token: &str) -> Result<User>;
+    async fn authenticate(&self, code: &str) -> Result<AuthSession> {
+        let tokens = self.exchange_code(code).await?;
+        let user = self.get_user(&tokens.access_token).await?;
+        Ok(AuthSession::new(user, tokens))
+    }
+}
+
+#[async_trait]
+pub trait IdentityProvider: Send + Sync {
+    async fn verify_token(&self, token: &str) -> Result<User>;
+    async fn get_user_by_id(&self, user_id: &str) -> Result<User>;
+}
+
+#[async_trait]
+pub trait MfaProvider: Send + Sync {
+    async fn generate_secret(&self, user_id: &str) -> Result<MfaSecret>;
+    async fn verify_code(&self, user_id: &str, code: &str) -> Result<bool>;
+    async fn is_enabled(&self, user_id: &str) -> Result<bool>;
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MfaSecret {
+    pub secret: String,
+    pub uri: String,
+    pub qr_code: Option<String>,
+    pub backup_codes: Option<Vec<String>>,
+}
+
+pub trait PasswordHasher: Send + Sync {
+    fn hash(&self, password: &str) -> Result<String>;
+    fn verify(&self, password: &str, hash: &str) -> Result<bool>;
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {

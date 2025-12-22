@@ -12,6 +12,7 @@ A Rust library for integrating SaaS APIs into Rust software. Swissknife provides
 | `swissknife-payments-sdk` | Payments (Stripe, PayPal, Square, Braintree, Adyen) |
 | `swissknife-crm-sdk` | CRM (Salesforce, HubSpot, Pipedrive, Zoho, Zendesk Sell) |
 | `swissknife-hr-sdk` | HR/HRIS (BambooHR, Gusto, Workday, Deel, Personio, HiBob) |
+| `swissknife-automation-sdk` | Automation (Zapier, Make, n8n, Pipedream, Tray.io, Workato) |
 
 ## Usage
 

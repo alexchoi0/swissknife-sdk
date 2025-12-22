@@ -1,0 +1,29 @@
+[package]
+name = "swissknife-automation-sdk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+homepage.workspace = true
+description = "Workflow automation SDK with integrations for Zapier, Make, n8n, Pipedream, Tray.io, and Workato"
+keywords = ["automation", "workflow", "zapier", "integration", "ipaas"]
+categories = ["api-bindings", "web-programming"]
+
+[features]
+default = ["zapier", "make", "n8n", "pipedream", "tray", "workato"]
+zapier = []
+make = []
+n8n = []
+pipedream = []
+tray = []
+workato = []
+
+[dependencies]
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.11", features = ["v4", "serde"] }

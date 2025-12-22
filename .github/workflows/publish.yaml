@@ -49,6 +49,9 @@ jobs:
       - name: Publish swissknife-payments-sdk
         run: cargo publish -p swissknife-payments-sdk --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
+      - name: Publish swissknife-crm-sdk
+        run: cargo publish -p swissknife-crm-sdk --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:

@@ -1,6 +1,6 @@
 # Swissknife SDK
 
-A go-to Rust library for developing software that runs on cloud infrastructure.
+A Rust library for integrating SaaS APIs into Rust software. Swissknife provides unified, type-safe clients for popular cloud services.
 
 ## Crates
 
@@ -9,14 +9,18 @@ A go-to Rust library for developing software that runs on cloud infrastructure.
 | `swissknife-auth-sdk` | Authentication (OAuth2, JWT, SAML, LDAP, SCIM, WebAuthn, TOTP) |
 | `swissknife-communication-sdk` | Messaging (Twilio, SendGrid, FCM, APNs, Slack, Discord, Telegram) |
 | `swissknife-social-sdk` | Social media (Instagram, Facebook, TikTok, Twitter/X, LinkedIn) |
+| `swissknife-payments-sdk` | Payments (Stripe, PayPal, Square, Braintree, Adyen) |
+| `swissknife-crm-sdk` | CRM (Salesforce, HubSpot, Pipedrive, Zoho, Zendesk Sell) |
 
 ## Usage
 
 ```toml
 [dependencies]
-swissknife-auth-sdk = { git = "https://github.com/alexchoi0/swissknife-sdk" }
-swissknife-communication-sdk = { git = "https://github.com/alexchoi0/swissknife-sdk" }
-swissknife-social-sdk = { git = "https://github.com/alexchoi0/swissknife-sdk" }
+swissknife-auth-sdk = "0.1"
+swissknife-communication-sdk = "0.1"
+swissknife-social-sdk = "0.1"
+swissknife-payments-sdk = "0.1"
+swissknife-crm-sdk = "0.1"
 ```
 
 ## License

@@ -1,0 +1,33 @@
+[package]
+name = "swissknife-payments-sdk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+homepage.workspace = true
+description = "Payments SDK with Stripe, PayPal, Square, Braintree, and Adyen support"
+keywords = ["payments", "stripe", "paypal", "square", "fintech"]
+categories = ["web-programming", "api-bindings"]
+
+[features]
+default = ["stripe", "paypal", "square", "braintree", "adyen"]
+stripe = []
+paypal = []
+square = []
+braintree = []
+adyen = []
+
+[dependencies]
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+base64 = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+hmac = "0.12"
+sha2 = "0.10"
+hex = { workspace = true }
+crc32fast = { workspace = true }

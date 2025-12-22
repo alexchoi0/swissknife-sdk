@@ -4,6 +4,7 @@ members = [
     "crates/swissknife-communication-sdk",
     "crates/swissknife-social-sdk",
     "crates/swissknife-auth-sdk",
+    "crates/swissknife-payments-sdk",
     "crates/swissknife-cli",
 ]
 
@@ -33,3 +34,5 @@ uuid = { version = "1.11", features = ["v4", "serde"] }
 rand = "0.8"
 url = "2.5"
 urlencoding = "2.1"
+hex = "0.4"
+crc32fast = "1.4"

@@ -1,0 +1,30 @@
+[package]
+name = "swissknife-hr-sdk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+homepage.workspace = true
+description = "HR and workforce management SDK with integrations for BambooHR, Gusto, Workday, Deel, Personio, and HiBob"
+keywords = ["hr", "hris", "payroll", "workforce", "employee"]
+categories = ["api-bindings", "web-programming"]
+
+[features]
+default = ["bamboohr", "gusto", "workday", "deel", "personio", "hibob"]
+bamboohr = []
+gusto = []
+workday = []
+deel = []
+personio = []
+hibob = []
+
+[dependencies]
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.11", features = ["v4", "serde"] }
+base64 = "0.22"

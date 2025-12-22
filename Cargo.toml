@@ -6,6 +6,7 @@ members = [
     "crates/swissknife-auth-sdk",
     "crates/swissknife-payments-sdk",
     "crates/swissknife-crm-sdk",
+    "crates/swissknife-hr-sdk",
     "crates/swissknife-cli",
 ]
 

@@ -3,7 +3,12 @@ name = "swissknife-communication-sdk"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Communication SDK with SMS, Voice, and WhatsApp support"
+repository.workspace = true
+authors.workspace = true
+homepage.workspace = true
+description = "Communication SDK with SMS, Voice, WhatsApp, Email, and Push notifications"
+keywords = ["sms", "twilio", "sendgrid", "push-notifications", "messaging"]
+categories = ["web-programming", "api-bindings"]
 
 [features]
 default = ["twilio", "sendgrid", "fcm", "apns", "slack", "discord", "telegram", "communication"]

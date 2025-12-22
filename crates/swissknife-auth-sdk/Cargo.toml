@@ -3,7 +3,12 @@ name = "swissknife-auth-sdk"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+authors.workspace = true
+homepage.workspace = true
 description = "Authentication SDK with OAuth, JWT, passwords, MFA, and provider integrations"
+keywords = ["auth", "oauth", "jwt", "authentication", "security"]
+categories = ["authentication", "web-programming"]
 
 [features]
 default = ["oauth2", "jwt", "password", "totp", "api-keys", "providers", "social"]

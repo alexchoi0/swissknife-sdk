@@ -3,7 +3,12 @@ name = "swissknife-social-sdk"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+authors.workspace = true
+homepage.workspace = true
 description = "Social media SDK with Instagram, Facebook, TikTok, Twitter/X, and LinkedIn support"
+keywords = ["social-media", "instagram", "facebook", "twitter", "linkedin"]
+categories = ["web-programming", "api-bindings"]
 
 [features]
 default = ["instagram", "facebook", "tiktok", "twitter", "linkedin", "social"]

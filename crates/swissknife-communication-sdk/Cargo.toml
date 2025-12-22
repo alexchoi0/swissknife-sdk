@@ -1,0 +1,31 @@
+[package]
+name = "swissknife-communication-sdk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Communication SDK with SMS, Voice, and WhatsApp support"
+
+[features]
+default = ["twilio", "sendgrid", "fcm", "apns", "slack", "discord", "telegram", "communication"]
+communication = ["sms", "voice", "whatsapp", "email", "push", "chat"]
+sms = []
+voice = []
+whatsapp = []
+email = []
+push = []
+chat = []
+twilio = []
+sendgrid = []
+fcm = []
+apns = []
+slack = []
+discord = []
+telegram = []
+
+[dependencies]
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+base64 = { workspace = true }

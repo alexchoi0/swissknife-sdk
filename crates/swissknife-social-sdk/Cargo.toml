@@ -1,0 +1,22 @@
+[package]
+name = "swissknife-social-sdk"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Social media SDK with Instagram, Facebook, TikTok, Twitter/X, and LinkedIn support"
+
+[features]
+default = ["instagram", "facebook", "tiktok", "twitter", "linkedin", "social"]
+social = []
+instagram = []
+facebook = []
+tiktok = []
+twitter = []
+linkedin = []
+
+[dependencies]
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }

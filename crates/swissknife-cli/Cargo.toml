@@ -1,0 +1,17 @@
+[package]
+name = "swissknife-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "CLI for testing swissknife SDKs"
+
+[[bin]]
+name = "swissknife"
+path = "src/main.rs"
+
+[dependencies]
+swissknife-communication-sdk = { workspace = true }
+swissknife-social-sdk = { workspace = true }
+swissknife-auth-sdk = { workspace = true }
+tokio = { workspace = true }
+clap = { workspace = true }

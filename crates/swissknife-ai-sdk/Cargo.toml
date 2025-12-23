@@ -10,13 +10,17 @@ default = []
 full = [
     "payments", "crm", "communication", "social", "hr", "banking", "auth", "llm",
     "search", "devtools", "productivity", "pm", "vectordb", "database", "ecommerce", "observability", "cloud",
-    "memory", "scraping", "queue", "mcp"
+    "memory", "scraping", "queue", "automation", "file", "markets", "research", "mcp"
 ]
 
 mcp = ["dep:rmcp", "dep:schemars"]
 memory = ["swissknife-memory-sdk"]
 scraping = ["swissknife-scraping-sdk"]
 queue = ["swissknife-queue-sdk"]
+automation = ["swissknife-automation-sdk"]
+file = ["swissknife-file-sdk"]
+markets = ["swissknife-markets-sdk"]
+research = ["swissknife-research-sdk"]
 
 payments = ["swissknife-payments-sdk"]
 crm = ["swissknife-crm-sdk"]
@@ -152,6 +156,17 @@ neo4j = ["database", "swissknife-database-sdk/neo4j"]
 rds = ["database", "swissknife-database-sdk/rds"]
 chromadb = ["vectordb", "swissknife-vectordb-sdk/chroma"]
 
+zapier = ["automation", "swissknife-automation-sdk/zapier"]
+make = ["automation", "swissknife-automation-sdk/make"]
+n8n = ["automation", "swissknife-automation-sdk/n8n"]
+
+sftp = ["file", "swissknife-file-sdk/sftp"]
+
+kalshi = ["markets", "swissknife-markets-sdk/kalshi"]
+polymarket = ["markets", "swissknife-markets-sdk/polymarket"]
+
+arxiv = ["research", "swissknife-research-sdk/arxiv"]
+
 [dependencies]
 async-trait = "0.1"
 base64 = "0.22"
@@ -184,6 +199,10 @@ swissknife-cloud-sdk = { path = "../swissknife-cloud-sdk", optional = true }
 swissknife-memory-sdk = { path = "../swissknife-memory-sdk", optional = true }
 swissknife-scraping-sdk = { path = "../swissknife-scraping-sdk", optional = true }
 swissknife-queue-sdk = { path = "../swissknife-queue-sdk", optional = true }
+swissknife-automation-sdk = { path = "../swissknife-automation-sdk", optional = true }
+swissknife-file-sdk = { path = "../swissknife-file-sdk", optional = true }
+swissknife-markets-sdk = { path = "../swissknife-markets-sdk", optional = true }
+swissknife-research-sdk = { path = "../swissknife-research-sdk", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }

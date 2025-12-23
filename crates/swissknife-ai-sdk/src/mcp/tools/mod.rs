@@ -5,6 +5,7 @@ pub mod productivity;
 pub mod database;
 pub mod memory;
 pub mod scraping;
+pub mod queue;
 
 pub use search::SearchTools;
 pub use llm::LlmTools;
@@ -13,3 +14,4 @@ pub use productivity::ProductivityTools;
 pub use database::DatabaseTools;
 pub use memory::MemoryTools;
 pub use scraping::ScrapingTools;
+pub use queue::QueueTools;

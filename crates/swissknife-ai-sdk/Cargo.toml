@@ -10,12 +10,13 @@ default = []
 full = [
     "payments", "crm", "communication", "social", "hr", "banking", "auth", "llm",
     "search", "devtools", "productivity", "pm", "vectordb", "database", "ecommerce", "observability", "cloud",
-    "memory", "scraping", "mcp"
+    "memory", "scraping", "queue", "mcp"
 ]
 
 mcp = ["dep:rmcp", "dep:schemars"]
 memory = ["swissknife-memory-sdk"]
 scraping = ["swissknife-scraping-sdk"]
+queue = ["swissknife-queue-sdk"]
 
 payments = ["swissknife-payments-sdk"]
 crm = ["swissknife-crm-sdk"]
@@ -143,10 +144,12 @@ apify_scrape = ["scraping", "swissknife-scraping-sdk/apify"]
 firecrawl_scrape = ["scraping", "swissknife-scraping-sdk/firecrawl"]
 browseruse = ["scraping", "swissknife-scraping-sdk/browseruse"]
 
-upstash = ["database", "swissknife-database-sdk/upstash"]
-planetscale = ["database", "swissknife-database-sdk/planetscale"]
-turso = ["database", "swissknife-database-sdk/turso"]
-neon = ["database", "swissknife-database-sdk/neon"]
+sqs = ["queue", "swissknife-queue-sdk/sqs"]
+kafka = ["queue", "swissknife-queue-sdk/kafka"]
+
+dynamodb = ["database", "swissknife-database-sdk/dynamodb"]
+neo4j = ["database", "swissknife-database-sdk/neo4j"]
+rds = ["database", "swissknife-database-sdk/rds"]
 chromadb = ["vectordb", "swissknife-vectordb-sdk/chroma"]
 
 [dependencies]
@@ -180,6 +183,7 @@ swissknife-observability-sdk = { path = "../swissknife-observability-sdk", optio
 swissknife-cloud-sdk = { path = "../swissknife-cloud-sdk", optional = true }
 swissknife-memory-sdk = { path = "../swissknife-memory-sdk", optional = true }
 swissknife-scraping-sdk = { path = "../swissknife-scraping-sdk", optional = true }
+swissknife-queue-sdk = { path = "../swissknife-queue-sdk", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }

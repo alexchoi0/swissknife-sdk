@@ -2,13 +2,14 @@
 name = "swissknife-queue-sdk"
 version = "0.1.0"
 edition = "2021"
-description = "Message queue SDK - Amazon SQS"
+description = "Message queue SDK - Amazon SQS, Apache Kafka"
 license = "MIT"
 
 [features]
 default = []
-full = ["sqs"]
+full = ["sqs", "kafka"]
 sqs = []
+kafka = []
 
 [dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

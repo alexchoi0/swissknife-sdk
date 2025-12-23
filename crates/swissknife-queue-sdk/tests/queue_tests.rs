@@ -174,3 +174,168 @@ mod signing_tests {
         assert!(amz_date.ends_with("Z"));
     }
 }
+
+#[cfg(feature = "kafka")]
+mod kafka_tests {
+    use swissknife_queue_sdk::kafka::{
+        KafkaClient, ProduceRequest, ProduceRecord, RecordHeader,
+        CreateConsumerRequest, SubscriptionRequest, TopicPartition,
+        CreateTopicRequest,
+    };
+
+    #[test]
+    fn test_kafka_client_creation() {
+        let client = KafkaClient::new("http://localhost:8082");
+        assert!(true);
+    }
+
+    #[test]
+    fn test_kafka_client_with_auth() {
+        let client = KafkaClient::new("https://pkc-xxxxx.us-east-1.aws.confluent.cloud")
+            .with_auth("api-key", "api-secret");
+        assert!(true);
+    }
+
+    #[test]
+    fn test_produce_record_creation() {
+        let record = ProduceRecord::new(serde_json::json!({"message": "hello"}));
+
+        assert!(record.key.is_none());
+        assert!(record.partition.is_none());
+        assert!(record.headers.is_none());
+    }
+
+    #[test]
+    fn test_produce_record_with_key() {
+        let record = ProduceRecord::new(serde_json::json!({"message": "hello"}))
+            .with_key(serde_json::json!("user-123"));
+
+        assert!(record.key.is_some());
+        assert_eq!(record.key.unwrap(), serde_json::json!("user-123"));
+    }
+
+    #[test]
+    fn test_produce_record_with_partition() {
+        let record = ProduceRecord::new(serde_json::json!({"message": "hello"}))
+            .with_partition(3);
+
+        assert_eq!(record.partition, Some(3));
+    }
+
+    #[test]
+    fn test_produce_record_with_headers() {
+        let record = ProduceRecord::new(serde_json::json!({"message": "hello"}))
+            .with_header("correlation-id", "abc-123")
+            .with_header("source", "test");
+
+        let headers = record.headers.unwrap();
+        assert_eq!(headers.len(), 2);
+        assert_eq!(headers[0].key, "correlation-id");
+        assert_eq!(headers[0].value, "abc-123");
+    }
+
+    #[test]
+    fn test_produce_request_creation() {
+        let request = ProduceRequest::new()
+            .with_record(ProduceRecord::new(serde_json::json!({"id": 1})))
+            .with_record(ProduceRecord::new(serde_json::json!({"id": 2})));
+
+        assert_eq!(request.records.len(), 2);
+    }
+
+    #[test]
+    fn test_produce_request_batch() {
+        let records = vec![
+            ProduceRecord::new(serde_json::json!({"id": 1})),
+            ProduceRecord::new(serde_json::json!({"id": 2})),
+            ProduceRecord::new(serde_json::json!({"id": 3})),
+        ];
+
+        let request = ProduceRequest::new().with_records(records);
+        assert_eq!(request.records.len(), 3);
+    }
+
+    #[test]
+    fn test_create_consumer_request() {
+        let request = CreateConsumerRequest::new("my-consumer")
+            .earliest()
+            .with_auto_commit(false)
+            .with_timeout(30000);
+
+        assert_eq!(request.name, "my-consumer");
+        assert_eq!(request.auto_offset_reset, Some("earliest".to_string()));
+        assert_eq!(request.auto_commit_enable, Some(false));
+        assert_eq!(request.consumer_request_timeout_ms, Some(30000));
+    }
+
+    #[test]
+    fn test_create_consumer_request_latest() {
+        let request = CreateConsumerRequest::new("my-consumer").latest();
+
+        assert_eq!(request.auto_offset_reset, Some("latest".to_string()));
+    }
+
+    #[test]
+    fn test_subscription_request_single() {
+        let request = SubscriptionRequest::single("my-topic");
+
+        assert_eq!(request.topics.len(), 1);
+        assert_eq!(request.topics[0], "my-topic");
+    }
+
+    #[test]
+    fn test_subscription_request_multiple() {
+        let request = SubscriptionRequest::new(vec![
+            "topic-1".to_string(),
+            "topic-2".to_string(),
+            "topic-3".to_string(),
+        ]);
+
+        assert_eq!(request.topics.len(), 3);
+    }
+
+    #[test]
+    fn test_topic_partition() {
+        let tp = TopicPartition {
+            topic: "my-topic".to_string(),
+            partition: 0,
+        };
+
+        assert_eq!(tp.topic, "my-topic");
+        assert_eq!(tp.partition, 0);
+    }
+
+    #[test]
+    fn test_create_topic_request() {
+        let request = CreateTopicRequest::new("my-topic")
+            .with_partitions(6)
+            .with_replication_factor(3)
+            .with_retention_ms(86400000);
+
+        assert_eq!(request.topic_name, "my-topic");
+        assert_eq!(request.partitions_count, Some(6));
+        assert_eq!(request.replication_factor, Some(3));
+        assert!(request.configs.is_some());
+    }
+
+    #[test]
+    fn test_create_topic_compacted() {
+        let request = CreateTopicRequest::new("my-compacted-topic")
+            .with_partitions(3)
+            .compacted();
+
+        let configs = request.configs.unwrap();
+        assert!(configs.iter().any(|c| c.name == "cleanup.policy" && c.value == "compact"));
+    }
+
+    #[test]
+    fn test_record_header() {
+        let header = RecordHeader {
+            key: "trace-id".to_string(),
+            value: "xyz-789".to_string(),
+        };
+
+        assert_eq!(header.key, "trace-id");
+        assert_eq!(header.value, "xyz-789");
+    }
+}

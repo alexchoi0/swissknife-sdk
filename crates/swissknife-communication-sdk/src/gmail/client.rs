@@ -1,0 +1,30 @@
+use crate::Result;
+use reqwest::Client;
+
+const BASE_URL: &str = "https://gmail.googleapis.com/gmail/v1";
+
+pub struct GmailClient {
+    access_token: String,
+    client: Client,
+}
+
+impl GmailClient {
+    pub fn new(access_token: &str) -> Self {
+        Self {
+            access_token: access_token.to_string(),
+            client: Client::new(),
+        }
+    }
+
+    pub(crate) fn client(&self) -> &Client {
+        &self.client
+    }
+
+    pub(crate) fn access_token(&self) -> &str {
+        &self.access_token
+    }
+
+    pub(crate) fn base_url(&self) -> &str {
+        BASE_URL
+    }
+}

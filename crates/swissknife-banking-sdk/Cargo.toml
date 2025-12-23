@@ -1,0 +1,36 @@
+[package]
+name = "swissknife-banking-sdk"
+description = "Open Banking SDK for Rust - Plaid, TrueLayer, Teller, GoCardless, Yapily, MX"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+readme.workspace = true
+homepage.workspace = true
+
+[features]
+default = []
+full = ["plaid", "truelayer", "teller", "gocardless", "yapily", "mx"]
+plaid = []
+truelayer = []
+teller = []
+gocardless = []
+yapily = []
+mx = []
+mock = ["sea-orm", "regex", "tokio"]
+
+[dependencies]
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+url = { workspace = true }
+urlencoding = { workspace = true }
+base64 = { workspace = true }
+sea-orm = { version = "1.1", features = ["sqlx-sqlite", "runtime-tokio-rustls", "macros"], optional = true }
+regex = { version = "1.11", optional = true }
+tokio = { workspace = true, optional = true }

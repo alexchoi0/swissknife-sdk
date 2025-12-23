@@ -1,0 +1,23 @@
+[package]
+name = "swissknife-devtools-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "Developer tools SDK - GitHub, GitLab, Cursor, Stagehand browser automation"
+license = "MIT"
+
+[features]
+default = []
+full = ["github", "gitlab", "cursor", "stagehand"]
+github = []
+gitlab = []
+cursor = []
+stagehand = []
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+async-trait = "0.1"
+chrono = { version = "0.4", features = ["serde"] }
+base64 = "0.22"

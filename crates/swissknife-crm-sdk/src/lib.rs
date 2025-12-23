@@ -17,6 +17,18 @@ pub mod zoho;
 #[cfg(feature = "zendesk")]
 pub mod zendesk;
 
+#[cfg(feature = "apollo")]
+pub mod apollo;
+
+#[cfg(feature = "hunter")]
+pub mod hunter;
+
+#[cfg(feature = "clay")]
+pub mod clay;
+
+#[cfg(feature = "wealthbox")]
+pub mod wealthbox;
+
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

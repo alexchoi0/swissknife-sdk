@@ -1,0 +1,20 @@
+[package]
+name = "swissknife-memory-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "Memory and knowledge SDK - Mem0, Zep"
+license = "MIT"
+
+[features]
+default = []
+full = ["mem0", "zep"]
+mem0 = []
+zep = []
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+async-trait = "0.1"
+chrono = { version = "0.4", features = ["serde"] }

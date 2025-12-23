@@ -1,0 +1,185 @@
+[package]
+name = "swissknife-ai-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "AI agent tools SDK wrapping swissknife service integrations"
+license = "MIT"
+
+[features]
+default = []
+full = [
+    "payments", "crm", "communication", "social", "hr", "banking", "auth", "llm",
+    "search", "devtools", "productivity", "pm", "vectordb", "database", "ecommerce", "observability", "cloud",
+    "memory", "scraping", "mcp"
+]
+
+mcp = ["dep:rmcp", "dep:schemars"]
+memory = ["swissknife-memory-sdk"]
+scraping = ["swissknife-scraping-sdk"]
+
+payments = ["swissknife-payments-sdk"]
+crm = ["swissknife-crm-sdk"]
+communication = ["swissknife-communication-sdk"]
+social = ["swissknife-social-sdk"]
+hr = ["swissknife-hr-sdk"]
+banking = ["swissknife-banking-sdk"]
+auth = ["swissknife-auth-sdk"]
+search = ["swissknife-search-sdk"]
+devtools = ["swissknife-devtools-sdk"]
+productivity = ["swissknife-productivity-sdk"]
+pm = ["swissknife-pm-sdk"]
+vectordb = ["swissknife-vectordb-sdk"]
+database = ["swissknife-database-sdk"]
+ecommerce = ["swissknife-ecommerce-sdk"]
+observability = ["swissknife-observability-sdk"]
+cloud = ["swissknife-cloud-sdk"]
+llm = []
+
+openai = ["llm"]
+anthropic = ["llm"]
+huggingface = ["llm"]
+elevenlabs = ["llm"]
+mistral = ["llm"]
+stability = ["llm"]
+runway = ["llm", "dep:tokio"]
+deepl = ["llm"]
+
+stripe = ["payments", "swissknife-payments-sdk/stripe"]
+paypal = ["payments", "swissknife-payments-sdk/paypal"]
+square = ["payments", "swissknife-payments-sdk/square"]
+
+salesforce = ["crm", "swissknife-crm-sdk/salesforce"]
+hubspot = ["crm", "swissknife-crm-sdk/hubspot"]
+pipedrive = ["crm", "swissknife-crm-sdk/pipedrive"]
+
+twilio = ["communication", "swissknife-communication-sdk/twilio", "swissknife-communication-sdk/sms"]
+sendgrid = ["communication", "swissknife-communication-sdk/sendgrid", "swissknife-communication-sdk/email"]
+gmail = ["communication", "swissknife-communication-sdk/gmail", "swissknife-communication-sdk/email"]
+mailgun = ["communication", "swissknife-communication-sdk/mailgun", "swissknife-communication-sdk/email"]
+mailchimp = ["communication", "swissknife-communication-sdk/mailchimp"]
+resend = ["communication", "swissknife-communication-sdk/resend", "swissknife-communication-sdk/email"]
+intercom = ["communication", "swissknife-communication-sdk/intercom"]
+teams = ["communication", "swissknife-communication-sdk/teams", "swissknife-communication-sdk/chat"]
+outlook = ["communication", "swissknife-communication-sdk/outlook", "swissknife-communication-sdk/email"]
+smtp = ["communication", "swissknife-communication-sdk/smtp", "swissknife-communication-sdk/email"]
+
+twitter = ["social", "swissknife-social-sdk/twitter"]
+linkedin = ["social", "swissknife-social-sdk/linkedin"]
+instagram = ["social", "swissknife-social-sdk/instagram"]
+reddit = ["social", "swissknife-social-sdk/reddit"]
+spotify = ["social", "swissknife-social-sdk/spotify"]
+youtube = ["social", "swissknife-social-sdk/youtube"]
+
+bamboohr = ["hr", "swissknife-hr-sdk/bamboohr"]
+gusto = ["hr", "swissknife-hr-sdk/gusto"]
+workday = ["hr", "swissknife-hr-sdk/workday"]
+
+plaid = ["banking", "swissknife-banking-sdk/plaid"]
+teller = ["banking", "swissknife-banking-sdk/teller"]
+
+oauth2 = ["auth", "swissknife-auth-sdk/oauth2"]
+jwt = ["auth", "swissknife-auth-sdk/jwt"]
+
+tavily = ["search", "swissknife-search-sdk/tavily"]
+exa = ["search", "swissknife-search-sdk/exa"]
+serper = ["search", "swissknife-search-sdk/serper"]
+jina = ["search", "swissknife-search-sdk/jina"]
+firecrawl = ["search", "swissknife-search-sdk/firecrawl"]
+apify = ["search", "swissknife-search-sdk/apify"]
+perplexity = ["search", "swissknife-search-sdk/perplexity"]
+duckduckgo = ["search", "swissknife-search-sdk/duckduckgo"]
+ahrefs = ["search", "swissknife-search-sdk/ahrefs"]
+google_search = ["search", "swissknife-search-sdk/google"]
+linkup = ["search", "swissknife-search-sdk/linkup"]
+wikipedia = ["search", "swissknife-search-sdk/wikipedia"]
+
+github = ["devtools", "swissknife-devtools-sdk/github"]
+gitlab = ["devtools", "swissknife-devtools-sdk/gitlab"]
+
+notion = ["productivity", "swissknife-productivity-sdk/notion"]
+google = ["productivity", "swissknife-productivity-sdk/google"]
+airtable = ["productivity", "swissknife-productivity-sdk/airtable"]
+calendly = ["productivity", "swissknife-productivity-sdk/calendly"]
+
+linear = ["pm", "swissknife-pm-sdk/linear"]
+jira = ["pm", "swissknife-pm-sdk/jira"]
+asana = ["pm", "swissknife-pm-sdk/asana"]
+trello = ["pm", "swissknife-pm-sdk/trello"]
+clickup = ["pm", "swissknife-pm-sdk/clickup"]
+
+pinecone = ["vectordb", "swissknife-vectordb-sdk/pinecone"]
+qdrant = ["vectordb", "swissknife-vectordb-sdk/qdrant"]
+weaviate = ["vectordb", "swissknife-vectordb-sdk/weaviate"]
+chroma = ["vectordb", "swissknife-vectordb-sdk/chroma"]
+
+postgres = ["database", "swissknife-database-sdk/postgres"]
+mysql = ["database", "swissknife-database-sdk/mysql"]
+mongodb = ["database", "swissknife-database-sdk/mongodb"]
+redis = ["database", "swissknife-database-sdk/redis"]
+elasticsearch = ["database", "swissknife-database-sdk/elasticsearch"]
+supabase = ["database", "swissknife-database-sdk/supabase"]
+clickhouse = ["database", "swissknife-database-sdk/clickhouse"]
+
+shopify = ["ecommerce", "swissknife-ecommerce-sdk/shopify"]
+woocommerce = ["ecommerce", "swissknife-ecommerce-sdk/woocommerce"]
+
+datadog = ["observability", "swissknife-observability-sdk/datadog"]
+posthog = ["observability", "swissknife-observability-sdk/posthog"]
+sentry = ["observability", "swissknife-observability-sdk/sentry"]
+mixpanel = ["observability", "swissknife-observability-sdk/mixpanel"]
+
+s3 = ["cloud", "swissknife-cloud-sdk/s3"]
+gcs = ["cloud", "swissknife-cloud-sdk/gcs"]
+dropbox = ["cloud", "swissknife-cloud-sdk/dropbox"]
+
+slack = ["communication", "swissknife-communication-sdk/slack", "swissknife-communication-sdk/chat"]
+discord = ["communication", "swissknife-communication-sdk/discord", "swissknife-communication-sdk/chat"]
+telegram = ["communication", "swissknife-communication-sdk/telegram", "swissknife-communication-sdk/chat"]
+
+mem0 = ["memory", "swissknife-memory-sdk/mem0"]
+zep = ["memory", "swissknife-memory-sdk/zep"]
+
+apify_scrape = ["scraping", "swissknife-scraping-sdk/apify"]
+firecrawl_scrape = ["scraping", "swissknife-scraping-sdk/firecrawl"]
+browseruse = ["scraping", "swissknife-scraping-sdk/browseruse"]
+
+upstash = ["database", "swissknife-database-sdk/upstash"]
+planetscale = ["database", "swissknife-database-sdk/planetscale"]
+turso = ["database", "swissknife-database-sdk/turso"]
+neon = ["database", "swissknife-database-sdk/neon"]
+chromadb = ["vectordb", "swissknife-vectordb-sdk/chroma"]
+
+[dependencies]
+async-trait = "0.1"
+base64 = "0.22"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream", "multipart"] }
+futures-util = "0.3"
+tokio = { version = "1.0", features = ["time"], optional = true }
+rmcp = { version = "0.12", features = ["server", "transport-io"], optional = true }
+schemars = { version = "0.8", optional = true }
+
+swissknife-payments-sdk = { path = "../swissknife-payments-sdk", optional = true }
+swissknife-crm-sdk = { path = "../swissknife-crm-sdk", optional = true }
+swissknife-communication-sdk = { path = "../swissknife-communication-sdk", optional = true }
+swissknife-social-sdk = { path = "../swissknife-social-sdk", optional = true }
+swissknife-hr-sdk = { path = "../swissknife-hr-sdk", optional = true }
+swissknife-banking-sdk = { path = "../swissknife-banking-sdk", optional = true }
+swissknife-auth-sdk = { path = "../swissknife-auth-sdk", optional = true }
+swissknife-search-sdk = { path = "../swissknife-search-sdk", optional = true }
+swissknife-devtools-sdk = { path = "../swissknife-devtools-sdk", optional = true }
+swissknife-productivity-sdk = { path = "../swissknife-productivity-sdk", optional = true }
+swissknife-pm-sdk = { path = "../swissknife-pm-sdk", optional = true }
+swissknife-vectordb-sdk = { path = "../swissknife-vectordb-sdk", optional = true }
+swissknife-database-sdk = { path = "../swissknife-database-sdk", optional = true }
+swissknife-ecommerce-sdk = { path = "../swissknife-ecommerce-sdk", optional = true }
+swissknife-observability-sdk = { path = "../swissknife-observability-sdk", optional = true }
+swissknife-cloud-sdk = { path = "../swissknife-cloud-sdk", optional = true }
+swissknife-memory-sdk = { path = "../swissknife-memory-sdk", optional = true }
+swissknife-scraping-sdk = { path = "../swissknife-scraping-sdk", optional = true }
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }

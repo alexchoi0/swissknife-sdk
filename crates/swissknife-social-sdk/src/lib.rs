@@ -15,6 +15,15 @@ pub mod twitter;
 #[cfg(feature = "linkedin")]
 pub mod linkedin;
 
+#[cfg(feature = "reddit")]
+pub mod reddit;
+
+#[cfg(feature = "spotify")]
+pub mod spotify;
+
+#[cfg(feature = "youtube")]
+pub mod youtube;
+
 pub use error::{Error, Result};
 
 #[cfg(feature = "social")]

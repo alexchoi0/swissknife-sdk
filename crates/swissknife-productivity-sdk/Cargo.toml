@@ -1,0 +1,40 @@
+[package]
+name = "swissknife-productivity-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "Productivity and docs SDK - Notion, Google Workspace, Microsoft 365, Airtable, Calendly, Typeform"
+license = "MIT"
+
+[features]
+default = []
+full = ["notion", "google", "google-docs", "google-sheets", "google-drive", "google-calendar", "airtable", "calendly", "confluence", "microsoft", "onedrive", "sharepoint", "excel", "planner", "typeform"]
+
+notion = []
+
+google = []
+google-docs = ["google"]
+google-sheets = ["google"]
+google-drive = ["google"]
+google-calendar = ["google"]
+
+airtable = []
+calendly = []
+confluence = []
+
+microsoft = []
+onedrive = ["microsoft"]
+sharepoint = ["microsoft"]
+excel = ["microsoft"]
+planner = ["microsoft"]
+
+typeform = []
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+async-trait = "0.1"
+chrono = { version = "0.4", features = ["serde"] }
+urlencoding = "2.1"
+base64 = "0.22"

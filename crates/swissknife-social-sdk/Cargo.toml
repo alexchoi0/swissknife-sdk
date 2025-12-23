@@ -12,12 +12,16 @@ categories = ["web-programming", "api-bindings"]
 
 [features]
 default = ["instagram", "facebook", "tiktok", "twitter", "linkedin", "social"]
+full = ["instagram", "facebook", "tiktok", "twitter", "linkedin", "reddit", "spotify", "youtube", "social"]
 social = []
 instagram = []
 facebook = []
 tiktok = []
 twitter = []
 linkedin = []
+reddit = []
+spotify = []
+youtube = []
 
 [dependencies]
 reqwest = { workspace = true }

@@ -21,6 +21,30 @@ pub mod discord;
 #[cfg(feature = "telegram")]
 pub mod telegram;
 
+#[cfg(feature = "gmail")]
+pub mod gmail;
+
+#[cfg(feature = "mailgun")]
+pub mod mailgun;
+
+#[cfg(feature = "mailchimp")]
+pub mod mailchimp;
+
+#[cfg(feature = "resend")]
+pub mod resend;
+
+#[cfg(feature = "intercom")]
+pub mod intercom;
+
+#[cfg(feature = "teams")]
+pub mod teams;
+
+#[cfg(feature = "outlook")]
+pub mod outlook;
+
+#[cfg(feature = "smtp")]
+pub mod smtp;
+
 pub use error::{Error, Result};
 
 #[cfg(feature = "sms")]

@@ -12,11 +12,16 @@ categories = ["web-programming", "api-bindings"]
 
 [features]
 default = ["salesforce", "hubspot", "pipedrive", "zoho", "zendesk"]
+full = ["salesforce", "hubspot", "pipedrive", "zoho", "zendesk", "apollo", "hunter", "clay", "wealthbox"]
 salesforce = []
 hubspot = []
 pipedrive = []
 zoho = []
 zendesk = []
+apollo = []
+hunter = []
+clay = []
+wealthbox = []
 
 [dependencies]
 reqwest = { workspace = true }

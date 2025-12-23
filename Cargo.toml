@@ -8,6 +8,23 @@ members = [
     "crates/swissknife-crm-sdk",
     "crates/swissknife-hr-sdk",
     "crates/swissknife-automation-sdk",
+    "crates/swissknife-banking-sdk",
+    "crates/swissknife-ai-sdk",
+    "crates/swissknife-search-sdk",
+    "crates/swissknife-devtools-sdk",
+    "crates/swissknife-productivity-sdk",
+    "crates/swissknife-pm-sdk",
+    "crates/swissknife-vectordb-sdk",
+    "crates/swissknife-database-sdk",
+    "crates/swissknife-ecommerce-sdk",
+    "crates/swissknife-observability-sdk",
+    "crates/swissknife-cloud-sdk",
+    "crates/swissknife-scraping-sdk",
+    "crates/swissknife-research-sdk",
+    "crates/swissknife-file-sdk",
+    "crates/swissknife-markets-sdk",
+    "crates/swissknife-queue-sdk",
+    "crates/swissknife-memory-sdk",
     "crates/swissknife-cli",
 ]
 
@@ -24,6 +41,27 @@ homepage = "https://github.com/alexchoi0/swissknife-sdk"
 swissknife-communication-sdk = { path = "crates/swissknife-communication-sdk" }
 swissknife-social-sdk = { path = "crates/swissknife-social-sdk" }
 swissknife-auth-sdk = { path = "crates/swissknife-auth-sdk" }
+swissknife-banking-sdk = { path = "crates/swissknife-banking-sdk" }
+swissknife-payments-sdk = { path = "crates/swissknife-payments-sdk" }
+swissknife-crm-sdk = { path = "crates/swissknife-crm-sdk" }
+swissknife-hr-sdk = { path = "crates/swissknife-hr-sdk" }
+swissknife-ai-sdk = { path = "crates/swissknife-ai-sdk" }
+swissknife-search-sdk = { path = "crates/swissknife-search-sdk" }
+swissknife-devtools-sdk = { path = "crates/swissknife-devtools-sdk" }
+swissknife-productivity-sdk = { path = "crates/swissknife-productivity-sdk" }
+swissknife-pm-sdk = { path = "crates/swissknife-pm-sdk" }
+swissknife-vectordb-sdk = { path = "crates/swissknife-vectordb-sdk" }
+swissknife-database-sdk = { path = "crates/swissknife-database-sdk" }
+swissknife-ecommerce-sdk = { path = "crates/swissknife-ecommerce-sdk" }
+swissknife-observability-sdk = { path = "crates/swissknife-observability-sdk" }
+swissknife-cloud-sdk = { path = "crates/swissknife-cloud-sdk" }
+swissknife-automation-sdk = { path = "crates/swissknife-automation-sdk" }
+swissknife-scraping-sdk = { path = "crates/swissknife-scraping-sdk" }
+swissknife-research-sdk = { path = "crates/swissknife-research-sdk" }
+swissknife-file-sdk = { path = "crates/swissknife-file-sdk" }
+swissknife-markets-sdk = { path = "crates/swissknife-markets-sdk" }
+swissknife-queue-sdk = { path = "crates/swissknife-queue-sdk" }
+swissknife-memory-sdk = { path = "crates/swissknife-memory-sdk" }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "http2"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

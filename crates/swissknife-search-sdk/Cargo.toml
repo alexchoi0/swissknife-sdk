@@ -1,0 +1,31 @@
+[package]
+name = "swissknife-search-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "Search and web research SDK - Tavily, Exa, Serper, Jina, Firecrawl, Apify, Perplexity, DuckDuckGo, Google, Ahrefs, Linkup, Wikipedia"
+license = "MIT"
+
+[features]
+default = []
+full = ["tavily", "exa", "serper", "jina", "firecrawl", "apify", "perplexity", "duckduckgo", "ahrefs", "google", "linkup", "wikipedia"]
+tavily = []
+exa = []
+serper = []
+jina = []
+firecrawl = []
+apify = []
+perplexity = []
+duckduckgo = []
+ahrefs = []
+google = []
+linkup = []
+wikipedia = []
+
+[dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+async-trait = "0.1"
+url = "2.5"
+urlencoding = "2.1"

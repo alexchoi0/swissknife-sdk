@@ -3,27 +3,6 @@ mod registry;
 mod tool;
 mod types;
 
-#[cfg(any(
-    feature = "payments",
-    feature = "crm",
-    feature = "communication",
-    feature = "social",
-    feature = "hr",
-    feature = "banking",
-    feature = "auth",
-    feature = "search",
-    feature = "devtools",
-    feature = "productivity",
-    feature = "pm",
-    feature = "vectordb",
-    feature = "database",
-    feature = "ecommerce",
-    feature = "observability",
-    feature = "cloud",
-    feature = "llm"
-))]
-pub mod tools;
-
 #[cfg(feature = "llm")]
 pub mod llm;
 

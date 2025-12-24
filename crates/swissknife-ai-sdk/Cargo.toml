@@ -186,29 +186,29 @@ tower-http = { version = "0.5", features = ["cors"], optional = true }
 async-stream = { version = "0.3", optional = true }
 clap = { version = "4.4", features = ["derive"], optional = true }
 
-swissknife-payments-sdk = { version = "0.1.0", path = "../swissknife-payments-sdk", optional = true }
-swissknife-crm-sdk = { version = "0.1.0", path = "../swissknife-crm-sdk", optional = true }
-swissknife-communication-sdk = { version = "0.1.0", path = "../swissknife-communication-sdk", optional = true }
-swissknife-social-sdk = { version = "0.1.0", path = "../swissknife-social-sdk", optional = true }
-swissknife-hr-sdk = { version = "0.1.0", path = "../swissknife-hr-sdk", optional = true }
-swissknife-banking-sdk = { version = "0.1.0", path = "../swissknife-banking-sdk", optional = true }
-swissknife-auth-sdk = { version = "0.1.0", path = "../swissknife-auth-sdk", optional = true }
-swissknife-search-sdk = { version = "0.1.0", path = "../swissknife-search-sdk", optional = true }
-swissknife-devtools-sdk = { version = "0.1.0", path = "../swissknife-devtools-sdk", optional = true }
-swissknife-productivity-sdk = { version = "0.1.0", path = "../swissknife-productivity-sdk", optional = true }
-swissknife-pm-sdk = { version = "0.1.0", path = "../swissknife-pm-sdk", optional = true }
-swissknife-vectordb-sdk = { version = "0.1.0", path = "../swissknife-vectordb-sdk", optional = true }
-swissknife-database-sdk = { version = "0.1.0", path = "../swissknife-database-sdk", optional = true }
-swissknife-ecommerce-sdk = { version = "0.1.0", path = "../swissknife-ecommerce-sdk", optional = true }
-swissknife-observability-sdk = { version = "0.1.0", path = "../swissknife-observability-sdk", optional = true }
-swissknife-cloud-sdk = { version = "0.1.0", path = "../swissknife-cloud-sdk", optional = true }
-swissknife-memory-sdk = { version = "0.1.0", path = "../swissknife-memory-sdk", optional = true }
-swissknife-scraping-sdk = { version = "0.1.0", path = "../swissknife-scraping-sdk", optional = true }
-swissknife-queue-sdk = { version = "0.1.0", path = "../swissknife-queue-sdk", optional = true }
-swissknife-automation-sdk = { version = "0.1.0", path = "../swissknife-automation-sdk", optional = true }
-swissknife-file-sdk = { version = "0.1.0", path = "../swissknife-file-sdk", optional = true }
-swissknife-markets-sdk = { version = "0.1.0", path = "../swissknife-markets-sdk", optional = true }
-swissknife-research-sdk = { version = "0.1.0", path = "../swissknife-research-sdk", optional = true }
+swissknife-payments-sdk = { version = "0.1.1", path = "../swissknife-payments-sdk", optional = true }
+swissknife-crm-sdk = { version = "0.1.1", path = "../swissknife-crm-sdk", optional = true }
+swissknife-communication-sdk = { version = "0.1.1", path = "../swissknife-communication-sdk", optional = true }
+swissknife-social-sdk = { version = "0.1.1", path = "../swissknife-social-sdk", optional = true }
+swissknife-hr-sdk = { version = "0.1.1", path = "../swissknife-hr-sdk", optional = true }
+swissknife-banking-sdk = { version = "0.1.1", path = "../swissknife-banking-sdk", optional = true }
+swissknife-auth-sdk = { version = "0.1.1", path = "../swissknife-auth-sdk", optional = true }
+swissknife-search-sdk = { version = "0.1.1", path = "../swissknife-search-sdk", optional = true }
+swissknife-devtools-sdk = { version = "0.1.1", path = "../swissknife-devtools-sdk", optional = true }
+swissknife-productivity-sdk = { version = "0.1.1", path = "../swissknife-productivity-sdk", optional = true }
+swissknife-pm-sdk = { version = "0.1.1", path = "../swissknife-pm-sdk", optional = true }
+swissknife-vectordb-sdk = { version = "0.1.1", path = "../swissknife-vectordb-sdk", optional = true }
+swissknife-database-sdk = { version = "0.1.1", path = "../swissknife-database-sdk", optional = true }
+swissknife-ecommerce-sdk = { version = "0.1.1", path = "../swissknife-ecommerce-sdk", optional = true }
+swissknife-observability-sdk = { version = "0.1.1", path = "../swissknife-observability-sdk", optional = true }
+swissknife-cloud-sdk = { version = "0.1.1", path = "../swissknife-cloud-sdk", optional = true }
+swissknife-memory-sdk = { version = "0.1.1", path = "../swissknife-memory-sdk", optional = true }
+swissknife-scraping-sdk = { version = "0.1.1", path = "../swissknife-scraping-sdk", optional = true }
+swissknife-queue-sdk = { version = "0.1.1", path = "../swissknife-queue-sdk", optional = true }
+swissknife-automation-sdk = { version = "0.1.1", path = "../swissknife-automation-sdk", optional = true }
+swissknife-file-sdk = { version = "0.1.1", path = "../swissknife-file-sdk", optional = true }
+swissknife-markets-sdk = { version = "0.1.1", path = "../swissknife-markets-sdk", optional = true }
+swissknife-research-sdk = { version = "0.1.1", path = "../swissknife-research-sdk", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }

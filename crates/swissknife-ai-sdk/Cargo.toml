@@ -1,9 +1,14 @@
 [package]
 name = "swissknife-ai-sdk"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+homepage.workspace = true
 description = "AI agent tools SDK wrapping swissknife service integrations"
-license = "MIT"
+keywords = ["ai", "mcp", "tools", "sdk", "agents"]
+categories = ["web-programming", "api-bindings"]
 
 [features]
 default = []

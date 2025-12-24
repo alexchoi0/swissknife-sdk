@@ -1,6 +1,6 @@
 [package]
 name = "swissknife-vectordb-sdk"
-version = "0.1.0"
+version.workspace = true
 edition = "2021"
 description = "Vector database SDK - Pinecone, Qdrant, Weaviate, Chroma, Milvus"
 license = "MIT"

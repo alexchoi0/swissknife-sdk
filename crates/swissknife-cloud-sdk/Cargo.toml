@@ -1,6 +1,6 @@
 [package]
 name = "swissknife-cloud-sdk"
-version = "0.1.0"
+version.workspace = true
 edition = "2021"
 description = "Cloud storage SDK - AWS S3, Google Cloud Storage, Azure Blob, Dropbox"
 license = "MIT"

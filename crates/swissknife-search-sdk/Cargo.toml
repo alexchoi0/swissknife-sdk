@@ -1,6 +1,6 @@
 [package]
 name = "swissknife-search-sdk"
-version = "0.1.0"
+version.workspace = true
 edition = "2021"
 description = "Search and web research SDK - Tavily, Exa, Serper, Jina, Firecrawl, Apify, Perplexity, DuckDuckGo, Google, Ahrefs, Linkup, Wikipedia"
 license = "MIT"

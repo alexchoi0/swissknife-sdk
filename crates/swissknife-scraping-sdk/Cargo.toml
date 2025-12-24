@@ -1,6 +1,6 @@
 [package]
 name = "swissknife-scraping-sdk"
-version = "0.1.0"
+version.workspace = true
 edition = "2021"
 description = "Web scraping SDK - Apify, Browser Use, Firecrawl"
 license = "MIT"

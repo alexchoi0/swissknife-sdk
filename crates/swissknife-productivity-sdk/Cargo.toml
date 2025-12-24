@@ -1,6 +1,6 @@
 [package]
 name = "swissknife-productivity-sdk"
-version = "0.1.0"
+version.workspace = true
 edition = "2021"
 description = "Productivity and docs SDK - Notion, Google Workspace, Microsoft 365, Airtable, Calendly, Typeform"
 license = "MIT"

@@ -1,6 +1,6 @@
 [package]
 name = "swissknife-research-sdk"
-version = "0.1.0"
+version.workspace = true
 edition = "2021"
 description = "Research SDK - ArXiv, academic papers, scholarly data"
 license = "MIT"

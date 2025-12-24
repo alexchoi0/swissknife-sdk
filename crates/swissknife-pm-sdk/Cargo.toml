@@ -1,6 +1,6 @@
 [package]
 name = "swissknife-pm-sdk"
-version = "0.1.0"
+version.workspace = true
 edition = "2021"
 description = "Project management SDK - Linear, Jira, Asana, Trello, ClickUp"
 license = "MIT"

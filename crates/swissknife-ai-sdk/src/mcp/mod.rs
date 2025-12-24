@@ -1,6 +1,9 @@
 pub mod server;
 pub mod tools;
 
+#[cfg(feature = "cli")]
+pub mod cli;
+
 pub use rmcp::{
     ServerHandler,
     ServiceExt,

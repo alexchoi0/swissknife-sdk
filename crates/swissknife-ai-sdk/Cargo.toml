@@ -15,6 +15,7 @@ full = [
 
 mcp = ["dep:rmcp", "dep:schemars"]
 http = ["dep:axum", "dep:tower-http", "dep:async-stream"]
+cli = ["mcp", "http", "dep:clap", "dep:tokio"]
 memory = ["swissknife-memory-sdk"]
 scraping = ["swissknife-scraping-sdk"]
 queue = ["swissknife-queue-sdk"]
@@ -177,12 +178,13 @@ thiserror = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream", "multipart"] }
 futures-util = "0.3"
-tokio = { version = "1.0", features = ["time"], optional = true }
+tokio = { version = "1.0", features = ["time", "rt-multi-thread", "macros", "io-std"], optional = true }
 rmcp = { version = "0.12", features = ["server", "transport-io"], optional = true }
 schemars = { version = "0.8", optional = true }
 axum = { version = "0.7", optional = true }
 tower-http = { version = "0.5", features = ["cors"], optional = true }
 async-stream = { version = "0.3", optional = true }
+clap = { version = "4.4", features = ["derive"], optional = true }
 
 swissknife-payments-sdk = { path = "../swissknife-payments-sdk", optional = true }
 swissknife-crm-sdk = { path = "../swissknife-crm-sdk", optional = true }
@@ -210,3 +212,8 @@ swissknife-research-sdk = { path = "../swissknife-research-sdk", optional = true
 
 [dev-dependencies]
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+
+[[bin]]
+name = "swissknife-mcp"
+path = "src/bin/mcp.rs"
+required-features = ["cli"]

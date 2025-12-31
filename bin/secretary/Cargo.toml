@@ -13,7 +13,7 @@ name = "secretary"
 path = "src/main.rs"
 
 [dependencies]
-swissknife-ai-sdk = { path = "../swissknife-ai-sdk", features = ["anthropic", "voyage", "duckdb"] }
+swissknife-ai-sdk = { path = "../../crates/swissknife-ai-sdk", features = ["anthropic", "voyage", "duckdb"] }
 tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "io-std"] }
 dotenvy = "0.15"
 uuid = { workspace = true }

@@ -26,7 +26,7 @@ members = [
     "crates/swissknife-queue-sdk",
     "crates/swissknife-memory-sdk",
     "crates/swissknife-cli",
-    "crates/secretary",
+    "bin/secretary",
 ]
 
 [workspace.package]

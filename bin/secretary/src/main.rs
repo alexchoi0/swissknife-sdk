@@ -5,8 +5,7 @@ use swissknife_ai_sdk::llm::{ChatMessage, ChatProvider, ChatRequest, ChatRespons
 use swissknife_ai_sdk::memory::{ActionType, DuckDBMemory, MemoryConfig};
 use uuid::Uuid;
 
-const CHAT_MODEL: &str = "claude-haiku-4-5-20251001";
-const THINKING_MODEL: &str = "claude-sonnet-4-20250514";
+const MODEL: &str = "claude-haiku-4-5";
 const EMBEDDING_MODEL: &str = "voyage-code-3";
 const MAX_TOKENS: u32 = 16000;
 const THINKING_BUDGET: u32 = 10000;
@@ -128,8 +127,7 @@ impl Secretary {
     }
 
     async fn chat(&self, messages: &[ChatMessage]) -> Result<ChatResponse, Box<dyn std::error::Error>> {
-        let model = if self.thinking_enabled { THINKING_MODEL } else { CHAT_MODEL };
-        let mut request = ChatRequest::new(model, messages.to_vec()).with_max_tokens(MAX_TOKENS);
+        let mut request = ChatRequest::new(MODEL, messages.to_vec()).with_max_tokens(MAX_TOKENS);
 
         if self.thinking_enabled {
             request = request.with_thinking(THINKING_BUDGET);

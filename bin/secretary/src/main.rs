@@ -1,3 +1,5 @@
+mod mcp_client;
+mod tool_registry;
 mod tools;
 
 use std::io::{self, BufRead, Write};
@@ -5,6 +7,7 @@ use swissknife_ai_sdk::llm::anthropic::AnthropicClient;
 use swissknife_ai_sdk::llm::voyage::VoyageClient;
 use swissknife_ai_sdk::llm::{ChatMessage, ChatProvider, ChatRequest, ChatResponse, EmbeddingProvider, EmbeddingRequest};
 use swissknife_ai_sdk::memory::{ActionType, DuckDBMemory, MemoryConfig};
+use tool_registry::ToolRegistry;
 use uuid::Uuid;
 
 const MODEL: &str = "claude-haiku-4-5";
@@ -18,11 +21,11 @@ struct Secretary {
     memory: DuckDBMemory,
     session_id: String,
     thinking_enabled: bool,
-    tools_enabled: bool,
+    tool_registry: ToolRegistry,
 }
 
 impl Secretary {
-    fn new(session_id: Option<String>, thinking_enabled: bool, tools_enabled: bool) -> Result<Self, Box<dyn std::error::Error>> {
+    fn new(session_id: Option<String>, thinking_enabled: bool, tool_registry: ToolRegistry) -> Result<Self, Box<dyn std::error::Error>> {
         let anthropic_key = std::env::var("ANTHROPIC_API_KEY")
             .map_err(|_| "ANTHROPIC_API_KEY not found")?;
 
@@ -63,8 +66,9 @@ impl Secretary {
         if thinking_enabled {
             eprintln!("Extended thinking enabled (budget: {} tokens)", THINKING_BUDGET);
         }
-        if tools_enabled {
-            eprintln!("Tools enabled: read_file, list_directory, search_files, execute_command, write_file");
+
+        if tool_registry.has_tools() {
+            tool_registry.print_available_tools();
         }
 
         Ok(Self {
@@ -73,14 +77,14 @@ impl Secretary {
             memory,
             session_id,
             thinking_enabled,
-            tools_enabled,
+            tool_registry,
         })
     }
 
     fn load_history(&self) -> Result<Vec<ChatMessage>, Box<dyn std::error::Error>> {
         let actions = self.memory.get_actions(&self.session_id)?;
-        let system_prompt = if self.tools_enabled {
-            "You are Secretary, a helpful assistant with access to tools. Use tools when appropriate to help the user. Available tools: read_file, list_directory, search_files, execute_command, write_file."
+        let system_prompt = if self.tool_registry.has_tools() {
+            "You are Secretary, a helpful assistant with access to tools. Use tools when appropriate to help the user."
         } else {
             "You are Secretary, a helpful assistant."
         };
@@ -145,8 +149,9 @@ impl Secretary {
             request = request.with_thinking(THINKING_BUDGET);
         }
 
-        if self.tools_enabled {
-            request = request.with_tools(tools::get_tool_definitions());
+        let tools = self.tool_registry.all_tool_definitions();
+        if !tools.is_empty() {
+            request = request.with_tools(tools);
         }
 
         let response = self.chat_client.chat(&request).await?;
@@ -303,7 +308,8 @@ impl Secretary {
                             messages.push(assistant_msg);
 
                             for tool_call in tool_calls {
-                                println!("🔧 {}: {}", tool_call.function.name, tool_call.function.arguments);
+                                let source = self.tool_registry.tool_source(&tool_call.function.name);
+                                println!("🔧 [{}] {}: {}", source, tool_call.function.name, tool_call.function.arguments);
                                 self.memory.add_tool_call(
                                     &self.session_id,
                                     &tool_call.id,
@@ -311,7 +317,7 @@ impl Secretary {
                                     &tool_call.function.arguments,
                                 )?;
 
-                                let result = tools::execute_tool(&tool_call.function.name, &tool_call.function.arguments);
+                                let result = self.tool_registry.execute_tool(&tool_call.function.name, &tool_call.function.arguments).await;
                                 let result_str = match &result {
                                     Ok(output) => {
                                         let truncated = if output.len() > 500 {
@@ -368,9 +374,36 @@ async fn main() {
     };
 
     let thinking_enabled = args.contains(&"--think".to_string());
-    let tools_enabled = args.contains(&"--tools".to_string());
+    let builtin_tools = args.contains(&"--tools".to_string());
+    let sdk_tools = args.contains(&"--sdk".to_string());
 
-    match Secretary::new(session_id, thinking_enabled, tools_enabled) {
+    // Collect MCP server commands (--mcp "command")
+    let mut mcp_servers: Vec<String> = Vec::new();
+    let mut i = 0;
+    while i < args.len() {
+        if args[i] == "--mcp" {
+            if let Some(cmd) = args.get(i + 1) {
+                mcp_servers.push(cmd.clone());
+                i += 2;
+                continue;
+            }
+        }
+        i += 1;
+    }
+
+    // Create tool registry
+    let mut tool_registry = ToolRegistry::new(builtin_tools, sdk_tools);
+
+    // Connect to MCP servers
+    for (idx, cmd) in mcp_servers.iter().enumerate() {
+        let name = format!("mcp-{}", idx);
+        if let Err(e) = tool_registry.add_mcp_server(&name, cmd).await {
+            eprintln!("Failed to connect to MCP server '{}': {}", cmd, e);
+            std::process::exit(1);
+        }
+    }
+
+    match Secretary::new(session_id, thinking_enabled, tool_registry) {
         Ok(secretary) => {
             if let Err(e) = secretary.run().await {
                 eprintln!("Error: {}", e);

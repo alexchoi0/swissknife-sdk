@@ -14,7 +14,8 @@ path = "src/main.rs"
 
 [dependencies]
 swissknife-ai-sdk = { path = "../../crates/swissknife-ai-sdk", features = ["anthropic", "voyage", "duckdb"] }
-tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "io-std"] }
+swissknife-search-sdk = { path = "../../crates/swissknife-search-sdk", features = ["tavily"] }
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "io-std", "process"] }
 dotenvy = "0.15"
 uuid = { workspace = true }
 chrono = { workspace = true }
@@ -22,3 +23,5 @@ dirs = "5.0"
 glob = "0.3"
 serde = { workspace = true }
 serde_json = { workspace = true }
+rmcp = { path = "../../vendor/rmcp", features = ["client", "transport-child-process"] }
+async-trait = { workspace = true }

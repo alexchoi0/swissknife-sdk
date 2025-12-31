@@ -1,3 +1,5 @@
+mod tools;
+
 use std::io::{self, BufRead, Write};
 use swissknife_ai_sdk::llm::anthropic::AnthropicClient;
 use swissknife_ai_sdk::llm::voyage::VoyageClient;
@@ -16,10 +18,11 @@ struct Secretary {
     memory: DuckDBMemory,
     session_id: String,
     thinking_enabled: bool,
+    tools_enabled: bool,
 }
 
 impl Secretary {
-    fn new(session_id: Option<String>, thinking_enabled: bool) -> Result<Self, Box<dyn std::error::Error>> {
+    fn new(session_id: Option<String>, thinking_enabled: bool, tools_enabled: bool) -> Result<Self, Box<dyn std::error::Error>> {
         let anthropic_key = std::env::var("ANTHROPIC_API_KEY")
             .map_err(|_| "ANTHROPIC_API_KEY not found")?;
 
@@ -60,6 +63,9 @@ impl Secretary {
         if thinking_enabled {
             eprintln!("Extended thinking enabled (budget: {} tokens)", THINKING_BUDGET);
         }
+        if tools_enabled {
+            eprintln!("Tools enabled: read_file, list_directory, search_files, execute_command, write_file");
+        }
 
         Ok(Self {
             chat_client: AnthropicClient::from_api_key(anthropic_key),
@@ -67,12 +73,18 @@ impl Secretary {
             memory,
             session_id,
             thinking_enabled,
+            tools_enabled,
         })
     }
 
     fn load_history(&self) -> Result<Vec<ChatMessage>, Box<dyn std::error::Error>> {
         let actions = self.memory.get_actions(&self.session_id)?;
-        let mut messages = vec![ChatMessage::system("You are Secretary, a helpful assistant.")];
+        let system_prompt = if self.tools_enabled {
+            "You are Secretary, a helpful assistant with access to tools. Use tools when appropriate to help the user. Available tools: read_file, list_directory, search_files, execute_command, write_file."
+        } else {
+            "You are Secretary, a helpful assistant."
+        };
+        let mut messages = vec![ChatMessage::system(system_prompt)];
 
         for action in actions {
             match action.action_type {
@@ -131,6 +143,10 @@ impl Secretary {
 
         if self.thinking_enabled {
             request = request.with_thinking(THINKING_BUDGET);
+        }
+
+        if self.tools_enabled {
+            request = request.with_tools(tools::get_tool_definitions());
         }
 
         let response = self.chat_client.chat(&request).await?;
@@ -258,20 +274,77 @@ impl Secretary {
             self.store_message("user", input).await?;
             messages.push(ChatMessage::user(input));
 
-            match self.chat(&messages).await {
-                Ok(response) => {
-                    if let Some(thinking) = response.thinking() {
-                        println!("\n💭 Thinking:\n{}\n", thinking);
-                        self.memory.add_thinking(&self.session_id, thinking)?;
+            loop {
+                match self.chat(&messages).await {
+                    Ok(response) => {
+                        if let Some(thinking) = response.thinking() {
+                            println!("\n💭 Thinking:\n{}\n", thinking);
+                            self.memory.add_thinking(&self.session_id, thinking)?;
+                        }
+
+                        if let Some(tool_calls) = response.tool_calls() {
+                            let content = response.content().unwrap_or("");
+                            if !content.is_empty() {
+                                println!("Secretary: {}", content);
+                            }
+
+                            let msg_content = if content.is_empty() {
+                                " ".to_string()
+                            } else {
+                                content.to_string()
+                            };
+                            let assistant_msg = ChatMessage {
+                                role: swissknife_ai_sdk::llm::MessageRole::Assistant,
+                                content: swissknife_ai_sdk::llm::MessageContent::Text(msg_content),
+                                name: None,
+                                tool_call_id: None,
+                                tool_calls: Some(tool_calls.to_vec()),
+                            };
+                            messages.push(assistant_msg);
+
+                            for tool_call in tool_calls {
+                                println!("🔧 {}: {}", tool_call.function.name, tool_call.function.arguments);
+                                self.memory.add_tool_call(
+                                    &self.session_id,
+                                    &tool_call.id,
+                                    &tool_call.function.name,
+                                    &tool_call.function.arguments,
+                                )?;
+
+                                let result = tools::execute_tool(&tool_call.function.name, &tool_call.function.arguments);
+                                let result_str = match &result {
+                                    Ok(output) => {
+                                        let truncated = if output.len() > 500 {
+                                            format!("{}... (truncated)", &output[..500])
+                                        } else {
+                                            output.clone()
+                                        };
+                                        println!("   ✓ {}", truncated.replace('\n', "\n     "));
+                                        output.clone()
+                                    }
+                                    Err(e) => {
+                                        println!("   ✗ Error: {}", e);
+                                        format!("Error: {}", e)
+                                    }
+                                };
+
+                                self.memory.add_tool_result(&self.session_id, &tool_call.id, &result_str)?;
+                                messages.push(ChatMessage::tool_result(&tool_call.id, &result_str));
+                            }
+                            continue;
+                        }
+
+                        let content = response.content().unwrap_or("");
+                        println!("Secretary: {}", content);
+                        self.store_message("assistant", content).await?;
+                        messages.push(ChatMessage::assistant(content));
+                        self.update_title_if_needed()?;
+                        break;
                     }
-                    let content = response.content().unwrap_or("");
-                    println!("Secretary: {}", content);
-                    self.store_message("assistant", content).await?;
-                    messages.push(ChatMessage::assistant(content));
-                    self.update_title_if_needed()?;
-                }
-                Err(e) => {
-                    eprintln!("Error: {}", e);
+                    Err(e) => {
+                        eprintln!("Error: {}", e);
+                        break;
+                    }
                 }
             }
         }
@@ -295,8 +368,9 @@ async fn main() {
     };
 
     let thinking_enabled = args.contains(&"--think".to_string());
+    let tools_enabled = args.contains(&"--tools".to_string());
 
-    match Secretary::new(session_id, thinking_enabled) {
+    match Secretary::new(session_id, thinking_enabled, tools_enabled) {
         Ok(secretary) => {
             if let Err(e) = secretary.run().await {
                 eprintln!("Error: {}", e);

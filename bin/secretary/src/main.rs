@@ -5,7 +5,7 @@ use swissknife_ai_sdk::llm::{ChatMessage, ChatProvider, ChatRequest, ChatRespons
 use swissknife_ai_sdk::memory::{ActionType, DuckDBMemory, MemoryConfig};
 use uuid::Uuid;
 
-const CHAT_MODEL: &str = "claude-3-5-haiku-20241022";
+const CHAT_MODEL: &str = "claude-haiku-4-5-20251001";
 const THINKING_MODEL: &str = "claude-sonnet-4-20250514";
 const EMBEDDING_MODEL: &str = "voyage-code-3";
 const MAX_TOKENS: u32 = 16000;

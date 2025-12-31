@@ -9,6 +9,9 @@ pub mod llm;
 #[cfg(feature = "mcp")]
 pub mod mcp;
 
+#[cfg(feature = "duckdb")]
+pub mod memory;
+
 pub use error::{Error, Result};
 pub use registry::ToolRegistry;
 pub use tool::{Tool, ToolBuilder};

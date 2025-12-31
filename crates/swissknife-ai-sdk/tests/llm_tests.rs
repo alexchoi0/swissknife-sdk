@@ -379,6 +379,7 @@ mod runway_tests {
     }
 }
 
+#[cfg(feature = "llm")]
 mod types_tests {
     use swissknife_ai_sdk::llm::{
         ChatRequest, ChatMessage, ChatResponse, ChatChoice, MessageRole, MessageContent,

@@ -5,12 +5,17 @@ use serde::Deserialize;
 #[cfg(feature = "memory")]
 use swissknife_memory_sdk as mem;
 
+#[cfg(feature = "duckdb")]
+use crate::memory::{ActionType, DuckDBMemory, MemoryConfig};
+
 #[derive(Clone)]
 pub struct MemoryTools {
     #[cfg(feature = "mem0")]
     pub mem0: Option<mem::mem0::Mem0Client>,
     #[cfg(feature = "zep")]
     pub zep: Option<mem::zep::ZepClient>,
+    #[cfg(feature = "duckdb")]
+    pub duckdb: Option<DuckDBMemory>,
 }
 
 impl MemoryTools {
@@ -20,6 +25,8 @@ impl MemoryTools {
             mem0: None,
             #[cfg(feature = "zep")]
             zep: None,
+            #[cfg(feature = "duckdb")]
+            duckdb: None,
         }
     }
 
@@ -32,6 +39,20 @@ impl MemoryTools {
     #[cfg(feature = "zep")]
     pub fn with_zep(mut self, client: mem::zep::ZepClient) -> Self {
         self.zep = Some(client);
+        self
+    }
+
+    #[cfg(feature = "duckdb")]
+    pub fn with_duckdb(mut self, memory: DuckDBMemory) -> Self {
+        self.duckdb = Some(memory);
+        self
+    }
+
+    #[cfg(feature = "duckdb")]
+    pub fn with_duckdb_default(mut self) -> Self {
+        if let Ok(memory) = DuckDBMemory::new(MemoryConfig::new()) {
+            self.duckdb = Some(memory);
+        }
         self
     }
 }
@@ -139,6 +160,67 @@ pub struct ZepCreateSessionRequest {
     pub user_id: Option<String>,
     #[serde(default)]
     pub metadata: Option<serde_json::Value>,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct LocalCreateSessionRequest {
+    pub session_id: String,
+    #[serde(default)]
+    pub title: Option<String>,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct LocalListSessionsRequest {
+    #[serde(default)]
+    pub limit: Option<u32>,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct LocalAddMessageRequest {
+    pub session_id: String,
+    pub role: String,
+    pub content: String,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct LocalAddToolCallRequest {
+    pub session_id: String,
+    pub tool_name: String,
+    pub tool_input: String,
+    pub tool_call_id: String,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct LocalAddToolResultRequest {
+    pub session_id: String,
+    pub tool_call_id: String,
+    pub content: String,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct LocalAddThinkingRequest {
+    pub session_id: String,
+    pub content: String,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct LocalGetActionsRequest {
+    pub session_id: String,
+    #[serde(default)]
+    pub action_type: Option<String>,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct LocalAddEmbeddingRequest {
+    pub action_id: String,
+    pub embedding: Vec<f32>,
+}
+
+#[derive(Debug, Deserialize, JsonSchema)]
+pub struct LocalSearchSimilarRequest {
+    pub embedding: Vec<f32>,
+    #[serde(default)]
+    pub limit: Option<u32>,
 }
 
 #[tool_box]
@@ -457,6 +539,210 @@ impl MemoryTools {
             "session_id": session.session_id,
             "user_id": session.user_id,
             "created_at": session.created_at
+        })).map_err(|e| e.to_string())
+    }
+
+    #[cfg(feature = "duckdb")]
+    #[rmcp::tool(description = "Create or get a local memory session")]
+    pub async fn local_create_session(
+        &self,
+        #[rmcp::tool(aggr)] req: LocalCreateSessionRequest,
+    ) -> Result<String, String> {
+        let memory = self.duckdb.as_ref()
+            .ok_or_else(|| "DuckDB memory not configured".to_string())?;
+
+        let session = memory.get_or_create_session(&req.session_id)
+            .map_err(|e| e.to_string())?;
+
+        if let Some(title) = req.title {
+            memory.update_session_title(&req.session_id, &title)
+                .map_err(|e| e.to_string())?;
+        }
+
+        serde_json::to_string_pretty(&serde_json::json!({
+            "session_id": session.session_id,
+            "title": session.title,
+            "created_at": session.created_at.to_rfc3339(),
+            "updated_at": session.updated_at.to_rfc3339()
+        })).map_err(|e| e.to_string())
+    }
+
+    #[cfg(feature = "duckdb")]
+    #[rmcp::tool(description = "List local memory sessions")]
+    pub async fn local_list_sessions(
+        &self,
+        #[rmcp::tool(aggr)] req: LocalListSessionsRequest,
+    ) -> Result<String, String> {
+        let memory = self.duckdb.as_ref()
+            .ok_or_else(|| "DuckDB memory not configured".to_string())?;
+
+        let sessions = memory.list_sessions(req.limit.unwrap_or(10) as usize)
+            .map_err(|e| e.to_string())?;
+
+        serde_json::to_string_pretty(&serde_json::json!({
+            "sessions": sessions.iter().map(|s| {
+                serde_json::json!({
+                    "session_id": s.session_id,
+                    "title": s.title,
+                    "created_at": s.created_at.to_rfc3339(),
+                    "updated_at": s.updated_at.to_rfc3339()
+                })
+            }).collect::<Vec<_>>()
+        })).map_err(|e| e.to_string())
+    }
+
+    #[cfg(feature = "duckdb")]
+    #[rmcp::tool(description = "Add a message to local memory")]
+    pub async fn local_add_message(
+        &self,
+        #[rmcp::tool(aggr)] req: LocalAddMessageRequest,
+    ) -> Result<String, String> {
+        let memory = self.duckdb.as_ref()
+            .ok_or_else(|| "DuckDB memory not configured".to_string())?;
+
+        let action_id = memory.add_message(&req.session_id, &req.role, &req.content)
+            .map_err(|e| e.to_string())?;
+
+        serde_json::to_string_pretty(&serde_json::json!({
+            "action_id": action_id,
+            "session_id": req.session_id,
+            "role": req.role
+        })).map_err(|e| e.to_string())
+    }
+
+    #[cfg(feature = "duckdb")]
+    #[rmcp::tool(description = "Add a tool call to local memory")]
+    pub async fn local_add_tool_call(
+        &self,
+        #[rmcp::tool(aggr)] req: LocalAddToolCallRequest,
+    ) -> Result<String, String> {
+        let memory = self.duckdb.as_ref()
+            .ok_or_else(|| "DuckDB memory not configured".to_string())?;
+
+        let action_id = memory.add_tool_call(&req.session_id, &req.tool_name, &req.tool_input, &req.tool_call_id)
+            .map_err(|e| e.to_string())?;
+
+        serde_json::to_string_pretty(&serde_json::json!({
+            "action_id": action_id,
+            "session_id": req.session_id,
+            "tool_name": req.tool_name
+        })).map_err(|e| e.to_string())
+    }
+
+    #[cfg(feature = "duckdb")]
+    #[rmcp::tool(description = "Add a tool result to local memory")]
+    pub async fn local_add_tool_result(
+        &self,
+        #[rmcp::tool(aggr)] req: LocalAddToolResultRequest,
+    ) -> Result<String, String> {
+        let memory = self.duckdb.as_ref()
+            .ok_or_else(|| "DuckDB memory not configured".to_string())?;
+
+        let action_id = memory.add_tool_result(&req.session_id, &req.tool_call_id, &req.content)
+            .map_err(|e| e.to_string())?;
+
+        serde_json::to_string_pretty(&serde_json::json!({
+            "action_id": action_id,
+            "session_id": req.session_id
+        })).map_err(|e| e.to_string())
+    }
+
+    #[cfg(feature = "duckdb")]
+    #[rmcp::tool(description = "Add thinking to local memory")]
+    pub async fn local_add_thinking(
+        &self,
+        #[rmcp::tool(aggr)] req: LocalAddThinkingRequest,
+    ) -> Result<String, String> {
+        let memory = self.duckdb.as_ref()
+            .ok_or_else(|| "DuckDB memory not configured".to_string())?;
+
+        let action_id = memory.add_thinking(&req.session_id, &req.content)
+            .map_err(|e| e.to_string())?;
+
+        serde_json::to_string_pretty(&serde_json::json!({
+            "action_id": action_id,
+            "session_id": req.session_id
+        })).map_err(|e| e.to_string())
+    }
+
+    #[cfg(feature = "duckdb")]
+    #[rmcp::tool(description = "Get all actions from a local memory session")]
+    pub async fn local_get_actions(
+        &self,
+        #[rmcp::tool(aggr)] req: LocalGetActionsRequest,
+    ) -> Result<String, String> {
+        let memory = self.duckdb.as_ref()
+            .ok_or_else(|| "DuckDB memory not configured".to_string())?;
+
+        let actions = if let Some(action_type) = req.action_type {
+            let at = ActionType::from_str(&action_type)
+                .ok_or_else(|| format!("Invalid action type: {}", action_type))?;
+            memory.get_actions_by_type(&req.session_id, at)
+        } else {
+            memory.get_actions(&req.session_id)
+        }.map_err(|e| e.to_string())?;
+
+        serde_json::to_string_pretty(&serde_json::json!({
+            "actions": actions.iter().map(|a| {
+                serde_json::json!({
+                    "id": a.id,
+                    "sequence": a.sequence,
+                    "action_type": a.action_type.as_str(),
+                    "role": a.role,
+                    "content": a.content,
+                    "tool_name": a.tool_name,
+                    "tool_input": a.tool_input,
+                    "tool_call_id": a.tool_call_id,
+                    "created_at": a.created_at.to_rfc3339()
+                })
+            }).collect::<Vec<_>>()
+        })).map_err(|e| e.to_string())
+    }
+
+    #[cfg(feature = "duckdb")]
+    #[rmcp::tool(description = "Add embedding for an action in local memory")]
+    pub async fn local_add_embedding(
+        &self,
+        #[rmcp::tool(aggr)] req: LocalAddEmbeddingRequest,
+    ) -> Result<String, String> {
+        let memory = self.duckdb.as_ref()
+            .ok_or_else(|| "DuckDB memory not configured".to_string())?;
+
+        memory.add_embedding(&req.action_id, &req.embedding)
+            .map_err(|e| e.to_string())?;
+
+        Ok(serde_json::json!({
+            "action_id": req.action_id,
+            "status": "ok"
+        }).to_string())
+    }
+
+    #[cfg(feature = "duckdb")]
+    #[rmcp::tool(description = "Search similar actions in local memory using embeddings")]
+    pub async fn local_search_similar(
+        &self,
+        #[rmcp::tool(aggr)] req: LocalSearchSimilarRequest,
+    ) -> Result<String, String> {
+        let memory = self.duckdb.as_ref()
+            .ok_or_else(|| "DuckDB memory not configured".to_string())?;
+
+        let results = memory.search_similar(&req.embedding, req.limit.unwrap_or(10) as usize)
+            .map_err(|e| e.to_string())?;
+
+        serde_json::to_string_pretty(&serde_json::json!({
+            "results": results.iter().map(|r| {
+                serde_json::json!({
+                    "action": {
+                        "id": r.action.id,
+                        "session_id": r.action.session_id,
+                        "action_type": r.action.action_type.as_str(),
+                        "role": r.action.role,
+                        "content": r.action.content,
+                        "created_at": r.action.created_at.to_rfc3339()
+                    },
+                    "score": r.score
+                })
+            }).collect::<Vec<_>>()
         })).map_err(|e| e.to_string())
     }
 }

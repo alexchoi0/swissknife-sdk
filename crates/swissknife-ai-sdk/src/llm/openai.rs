@@ -297,11 +297,12 @@ impl VisionProvider for OpenAIClient {
         };
 
         let response = self.chat(&chat_request).await?;
+        let content = response.content().unwrap_or_default().to_string();
 
         Ok(VisionResponse {
             id: response.id,
             model: response.model,
-            content: response.content().unwrap_or_default().to_string(),
+            content,
             usage: response.usage,
         })
     }

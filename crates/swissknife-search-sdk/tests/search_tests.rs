@@ -404,15 +404,15 @@ mod error_tests {
     }
 
     #[test]
-    fn test_search_failed_error() {
-        let error = Error::SearchFailed("Query too long".to_string());
+    fn test_invalid_request_error() {
+        let error = Error::InvalidRequest("Query too long".to_string());
         let error_string = format!("{}", error);
         assert!(error_string.contains("Query too long"));
     }
 
     #[test]
-    fn test_invalid_query_error() {
-        let error = Error::InvalidQuery("Empty query string".to_string());
+    fn test_parse_error() {
+        let error = Error::Parse("Empty query string".to_string());
         let error_string = format!("{}", error);
         assert!(error_string.contains("Empty query"));
     }

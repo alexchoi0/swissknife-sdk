@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use super::{
     ChatMessage, ChatProvider, ChatRequest, ChatResponse, ChatChoice, ChatStreamEvent,
     ChatStreamResponse, MessageContent, MessageRole, ProviderConfig, StreamDelta, Usage,
-    VisionProvider, VisionRequest, VisionResponse, ContentPart, ImageContent,
+    VisionProvider, VisionRequest, VisionResponse, ContentPart,
 };
 
 const API_BASE: &str = "https://api.anthropic.com/v1";
@@ -425,11 +425,12 @@ impl VisionProvider for AnthropicClient {
         };
 
         let response = self.chat(&chat_request).await?;
+        let content = response.content().unwrap_or_default().to_string();
 
         Ok(VisionResponse {
             id: response.id,
             model: response.model,
-            content: response.content().unwrap_or_default().to_string(),
+            content,
             usage: response.usage,
         })
     }

@@ -24,6 +24,9 @@ pub mod runway;
 #[cfg(feature = "deepl")]
 pub mod deepl;
 
+#[cfg(feature = "voyage")]
+pub mod voyage;
+
 pub use types::*;
 
 use async_trait::async_trait;

@@ -1,0 +1,21 @@
+[package]
+name = "secretary"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+homepage.workspace = true
+description = "A conversational CLI assistant powered by Claude Haiku"
+
+[[bin]]
+name = "secretary"
+path = "src/main.rs"
+
+[dependencies]
+swissknife-ai-sdk = { path = "../swissknife-ai-sdk", features = ["anthropic", "voyage", "duckdb"] }
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "io-std"] }
+dotenvy = "0.15"
+uuid = { workspace = true }
+chrono = { workspace = true }
+dirs = "5.0"

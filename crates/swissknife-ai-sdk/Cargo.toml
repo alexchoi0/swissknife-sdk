@@ -55,6 +55,9 @@ mistral = ["llm"]
 stability = ["llm"]
 runway = ["llm", "dep:tokio"]
 deepl = ["llm"]
+voyage = ["llm"]
+
+duckdb = ["dep:duckdb", "dep:dirs", "dep:uuid"]
 
 stripe = ["payments", "swissknife-payments-sdk/stripe"]
 paypal = ["payments", "swissknife-payments-sdk/paypal"]
@@ -179,17 +182,20 @@ async-trait = "0.1"
 base64 = "0.22"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-thiserror = "1.0"
+thiserror = "2.0"
 chrono = { version = "0.4", features = ["serde"] }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream", "multipart"] }
 futures-util = "0.3"
 tokio = { version = "1.0", features = ["time", "rt-multi-thread", "macros", "io-std"], optional = true }
 rmcp = { version = "0.12", features = ["server", "transport-io"], optional = true }
-schemars = { version = "0.8", optional = true }
+schemars = { version = "1.0", optional = true }
 axum = { version = "0.7", optional = true }
-tower-http = { version = "0.5", features = ["cors"], optional = true }
+tower-http = { version = "0.6", features = ["cors"], optional = true }
 async-stream = { version = "0.3", optional = true }
 clap = { version = "4.4", features = ["derive"], optional = true }
+duckdb = { version = "1.4", features = ["bundled"], optional = true }
+dirs = { version = "5.0", optional = true }
+uuid = { version = "1.0", features = ["v4"], optional = true }
 
 swissknife-payments-sdk = { version = ">=0.1", path = "../swissknife-payments-sdk", optional = true }
 swissknife-crm-sdk = { version = ">=0.1", path = "../swissknife-crm-sdk", optional = true }

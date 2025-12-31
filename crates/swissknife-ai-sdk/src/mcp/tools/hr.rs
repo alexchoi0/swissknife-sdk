@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -105,7 +105,7 @@ pub struct WorkdaySearchWorkersRequest {
     pub limit: Option<u32>,
 }
 
-#[tool_box]
+#[tool_router]
 impl HrTools {
     #[cfg(feature = "bamboohr")]
     #[rmcp::tool(description = "Get an employee from BambooHR")]

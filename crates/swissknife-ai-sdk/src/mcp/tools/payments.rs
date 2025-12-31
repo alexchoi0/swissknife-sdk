@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -125,7 +125,7 @@ pub struct SquareCreatePaymentRequest {
     pub customer_id: Option<String>,
 }
 
-#[tool_box]
+#[tool_router]
 impl PaymentsTools {
     #[cfg(feature = "stripe")]
     #[rmcp::tool(description = "Create a new Stripe customer")]

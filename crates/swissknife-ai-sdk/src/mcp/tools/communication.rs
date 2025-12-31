@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -133,7 +133,7 @@ pub struct TwilioSmsRequest {
     pub body: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl CommunicationTools {
     #[cfg(feature = "slack")]
     #[rmcp::tool(description = "Send a message to a Slack channel")]

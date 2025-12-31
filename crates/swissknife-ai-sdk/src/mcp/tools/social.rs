@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -138,7 +138,7 @@ pub struct YouTubeGetChannelRequest {
     pub channel_id: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl SocialTools {
     #[cfg(feature = "twitter")]
     #[rmcp::tool(description = "Post a tweet on Twitter/X")]

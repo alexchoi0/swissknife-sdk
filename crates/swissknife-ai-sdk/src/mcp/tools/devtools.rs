@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -148,7 +148,7 @@ pub struct GitLabListMergeRequestsRequest {
     pub per_page: Option<u32>,
 }
 
-#[tool_box]
+#[tool_router]
 impl DevtoolsTools {
     #[cfg(feature = "github")]
     #[rmcp::tool(description = "Get information about a GitHub repository")]

@@ -17,7 +17,7 @@ pub use registry::ToolRegistry;
 pub use tool::{Tool, ToolBuilder};
 pub use types::{
     OutputSchema, OutputType, ParameterSchema, ParameterType, ParameterVisibility,
-    ToolDefinition, ToolResponse, ToolTiming,
+    ToolSpec, ToolOutput, ToolTiming,
 };
 
 pub use tool::{
@@ -29,7 +29,7 @@ pub mod prelude {
     pub use crate::registry::ToolRegistry;
     pub use crate::tool::Tool;
     pub use crate::types::{
-        OutputSchema, ParameterSchema, ToolDefinition, ToolResponse,
+        OutputSchema, ParameterSchema, ToolSpec, ToolOutput,
     };
     pub use crate::{Error, Result};
 }

@@ -1,13 +1,13 @@
 use crate::error::Result;
-use crate::types::{ToolDefinition, ToolResponse};
+use crate::types::{ToolSpec, ToolOutput};
 use async_trait::async_trait;
 use std::collections::HashMap;
 
 #[async_trait]
 pub trait Tool: Send + Sync {
-    fn definition(&self) -> ToolDefinition;
+    fn definition(&self) -> ToolSpec;
 
-    async fn execute(&self, params: HashMap<String, serde_json::Value>) -> Result<ToolResponse>;
+    async fn execute(&self, params: HashMap<String, serde_json::Value>) -> Result<ToolOutput>;
 
     fn id(&self) -> String {
         self.definition().id

@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -102,7 +102,7 @@ pub struct TellerGetBalanceRequest {
     pub account_id: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl BankingTools {
     #[cfg(feature = "plaid")]
     #[rmcp::tool(description = "Get accounts from Plaid")]

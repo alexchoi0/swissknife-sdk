@@ -1,5 +1,13 @@
 pub mod server;
+pub mod types;
+pub mod provider;
+pub mod providers;
+
+#[cfg(feature = "mcp-tools")]
 pub mod tools;
+
+#[cfg(feature = "mcp-inprocess")]
+mod host;
 
 #[cfg(feature = "cli")]
 pub mod cli;
@@ -19,4 +27,8 @@ pub use rmcp::{
     schemars,
 };
 
-pub use rmcp::tool_box;
+pub use rmcp::tool_router;
+
+#[cfg(feature = "mcp-inprocess")]
+pub use host::McpHost;
+pub use provider::{ToolProvider, ResourceProvider, PromptProvider};

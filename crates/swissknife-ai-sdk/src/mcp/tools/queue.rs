@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -157,7 +157,7 @@ pub struct KafkaGetConsumerLagRequest {
     pub group_id: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl QueueTools {
     #[cfg(feature = "sqs")]
     #[rmcp::tool(description = "Send a message to an Amazon SQS queue")]

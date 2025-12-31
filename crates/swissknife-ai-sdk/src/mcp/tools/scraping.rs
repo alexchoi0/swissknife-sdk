@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -166,7 +166,7 @@ pub struct BrowserUseExtractRequest {
     pub attribute: Option<String>,
 }
 
-#[tool_box]
+#[tool_router]
 impl ScrapingTools {
     #[cfg(feature = "apify")]
     #[rmcp::tool(description = "Run an Apify actor")]

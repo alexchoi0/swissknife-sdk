@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -141,7 +141,7 @@ pub struct MixpanelSetProfileRequest {
     pub properties: serde_json::Value,
 }
 
-#[tool_box]
+#[tool_router]
 impl ObservabilityTools {
     #[cfg(feature = "datadog")]
     #[rmcp::tool(description = "Send a metric to Datadog")]

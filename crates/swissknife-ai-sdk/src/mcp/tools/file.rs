@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -69,7 +69,7 @@ pub struct SftpStatRequest {
     pub path: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl FileTools {
     #[cfg(feature = "sftp")]
     #[rmcp::tool(description = "List files in a directory via SFTP")]

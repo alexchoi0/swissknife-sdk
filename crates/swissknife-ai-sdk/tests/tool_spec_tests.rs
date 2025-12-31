@@ -1,40 +1,40 @@
 use std::collections::HashMap;
-use swissknife_ai_sdk::{OutputSchema, ParameterSchema, ParameterType, ParameterVisibility, ToolDefinition};
+use swissknife_ai_sdk::{OutputSchema, ParameterSchema, ParameterType, ParameterVisibility, ToolSpec};
 
-mod tool_definition_builder {
+mod tool_spec_builder {
     use super::*;
 
     #[test]
-    fn test_tool_definition_new_sets_default_version() {
-        let def = ToolDefinition::new("test", "Test", "Description", "category");
+    fn test_tool_spec_new_sets_default_version() {
+        let def = ToolSpec::new("test", "Test", "Description", "category");
         assert_eq!(def.version, "1.0.0");
     }
 
     #[test]
-    fn test_tool_definition_with_version_overrides_default() {
-        let def = ToolDefinition::new("test", "Test", "Description", "category")
+    fn test_tool_spec_with_version_overrides_default() {
+        let def = ToolSpec::new("test", "Test", "Description", "category")
             .with_version("2.0.0");
         assert_eq!(def.version, "2.0.0");
     }
 
     #[test]
-    fn test_tool_definition_with_param_adds_parameter() {
-        let def = ToolDefinition::new("test", "Test", "Description", "category")
+    fn test_tool_spec_with_param_adds_parameter() {
+        let def = ToolSpec::new("test", "Test", "Description", "category")
             .with_param("name", ParameterSchema::string("A name"));
         assert!(def.params.contains_key("name"));
         assert_eq!(def.params["name"].param_type, ParameterType::String);
     }
 
     #[test]
-    fn test_tool_definition_with_output_adds_output() {
-        let def = ToolDefinition::new("test", "Test", "Description", "category")
+    fn test_tool_spec_with_output_adds_output() {
+        let def = ToolSpec::new("test", "Test", "Description", "category")
             .with_output("result", OutputSchema::string("The result"));
         assert!(def.outputs.contains_key("result"));
     }
 
     #[test]
-    fn test_tool_definition_chained_params() {
-        let def = ToolDefinition::new("test", "Test", "Description", "category")
+    fn test_tool_spec_chained_params() {
+        let def = ToolSpec::new("test", "Test", "Description", "category")
             .with_param("a", ParameterSchema::string("Param A"))
             .with_param("b", ParameterSchema::number("Param B"))
             .with_param("c", ParameterSchema::boolean("Param C"));

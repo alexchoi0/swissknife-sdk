@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -113,7 +113,7 @@ pub struct DetectLanguageRequest {
     pub text: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl LlmTools {
     #[cfg(feature = "openai")]
     #[rmcp::tool(description = "Send a chat message to OpenAI GPT models")]

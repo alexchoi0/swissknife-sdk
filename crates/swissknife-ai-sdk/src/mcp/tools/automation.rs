@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -103,7 +103,7 @@ pub struct N8nActivateWorkflowRequest {
     pub active: bool,
 }
 
-#[tool_box]
+#[tool_router]
 impl AutomationTools {
     #[cfg(feature = "zapier")]
     #[rmcp::tool(description = "Trigger a Zapier webhook")]

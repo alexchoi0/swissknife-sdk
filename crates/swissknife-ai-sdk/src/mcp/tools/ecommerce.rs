@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -126,7 +126,7 @@ pub struct WooCommerceGetOrderRequest {
     pub order_id: i64,
 }
 
-#[tool_box]
+#[tool_router]
 impl EcommerceTools {
     #[cfg(feature = "shopify")]
     #[rmcp::tool(description = "List products from Shopify store")]

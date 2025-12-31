@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -84,7 +84,7 @@ pub struct OAuth2ValidateTokenRequest {
     pub access_token: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl AuthTools {
     #[cfg(feature = "jwt")]
     #[rmcp::tool(description = "Create a new JWT token")]

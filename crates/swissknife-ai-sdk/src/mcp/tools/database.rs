@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -266,7 +266,7 @@ pub struct ChromaQueryRequest {
     pub n_results: Option<u32>,
 }
 
-#[tool_box]
+#[tool_router]
 impl DatabaseTools {
     #[cfg(feature = "supabase")]
     #[rmcp::tool(description = "Execute a query on Supabase")]

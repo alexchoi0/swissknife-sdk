@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -143,7 +143,7 @@ pub struct PipedriveCreateDealRequest {
     pub org_id: Option<i64>,
 }
 
-#[tool_box]
+#[tool_router]
 impl CrmTools {
     #[cfg(feature = "hubspot")]
     #[rmcp::tool(description = "Create a new contact in HubSpot")]

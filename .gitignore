@@ -33,4 +33,6 @@ lcov.info
 CLAUDE.md
 
 vendor/
+!vendor/rmcp/
+!vendor/rmcp-macros/
 .cargo/

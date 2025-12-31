@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -95,7 +95,7 @@ pub struct PolymarketSearchMarketsRequest {
     pub limit: Option<u32>,
 }
 
-#[tool_box]
+#[tool_router]
 impl MarketsTools {
     #[cfg(feature = "kalshi")]
     #[rmcp::tool(description = "List prediction markets from Kalshi")]

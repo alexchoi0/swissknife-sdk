@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -160,7 +160,7 @@ pub struct ChromaQueryRequest {
     pub n_results: u32,
 }
 
-#[tool_box]
+#[tool_router]
 impl VectorDbTools {
     #[cfg(feature = "pinecone")]
     #[rmcp::tool(description = "Upsert vectors to Pinecone")]

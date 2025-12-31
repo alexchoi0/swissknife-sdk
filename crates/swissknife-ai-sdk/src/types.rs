@@ -251,7 +251,7 @@ impl OutputSchema {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ToolResponse {
+pub struct ToolOutput {
     pub success: bool,
     pub output: serde_json::Value,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -267,7 +267,7 @@ pub struct ToolTiming {
     pub duration_ms: u64,
 }
 
-impl ToolResponse {
+impl ToolOutput {
     pub fn success(output: serde_json::Value) -> Self {
         Self {
             success: true,
@@ -298,7 +298,7 @@ impl ToolResponse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ToolDefinition {
+pub struct ToolSpec {
     pub id: String,
     pub name: String,
     pub description: String,
@@ -308,7 +308,7 @@ pub struct ToolDefinition {
     pub outputs: HashMap<String, OutputSchema>,
 }
 
-impl ToolDefinition {
+impl ToolSpec {
     pub fn new(
         id: impl Into<String>,
         name: impl Into<String>,

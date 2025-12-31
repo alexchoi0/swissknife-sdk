@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -188,7 +188,7 @@ pub struct ClickUpGetTaskRequest {
     pub task_id: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl PmTools {
     #[cfg(feature = "linear")]
     #[rmcp::tool(description = "Create a new issue in Linear")]

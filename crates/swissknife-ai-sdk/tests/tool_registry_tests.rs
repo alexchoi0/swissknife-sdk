@@ -2,25 +2,25 @@ use async_trait::async_trait;
 use std::collections::HashMap;
 use std::sync::Arc;
 use swissknife_ai_sdk::{
-    Error, OutputSchema, ParameterSchema, Result, Tool, ToolDefinition, ToolRegistry, ToolResponse,
+    Error, OutputSchema, ParameterSchema, Result, Tool, ToolSpec, ToolRegistry, ToolOutput,
 };
 
 struct EchoTool;
 
 #[async_trait]
 impl Tool for EchoTool {
-    fn definition(&self) -> ToolDefinition {
-        ToolDefinition::new("echo", "Echo Tool", "Returns the input message", "utility")
+    fn definition(&self) -> ToolSpec {
+        ToolSpec::new("echo", "Echo Tool", "Returns the input message", "utility")
             .with_param("message", ParameterSchema::string("The message to echo").required())
             .with_output("result", OutputSchema::string("The echoed message"))
     }
 
-    async fn execute(&self, params: HashMap<String, serde_json::Value>) -> Result<ToolResponse> {
+    async fn execute(&self, params: HashMap<String, serde_json::Value>) -> Result<ToolOutput> {
         let message = params
             .get("message")
             .and_then(|v| v.as_str())
             .ok_or_else(|| Error::MissingParameter("message".to_string()))?;
-        Ok(ToolResponse::success(serde_json::json!({ "result": message })))
+        Ok(ToolOutput::success(serde_json::json!({ "result": message })))
     }
 }
 
@@ -28,15 +28,15 @@ struct CalculatorTool;
 
 #[async_trait]
 impl Tool for CalculatorTool {
-    fn definition(&self) -> ToolDefinition {
-        ToolDefinition::new("calculator", "Calculator", "Performs arithmetic", "math")
+    fn definition(&self) -> ToolSpec {
+        ToolSpec::new("calculator", "Calculator", "Performs arithmetic", "math")
             .with_param("a", ParameterSchema::number("First operand").required())
             .with_param("b", ParameterSchema::number("Second operand").required())
             .with_param("operation", ParameterSchema::string("add, sub, mul, div").required())
             .with_output("result", OutputSchema::number("The calculation result"))
     }
 
-    async fn execute(&self, params: HashMap<String, serde_json::Value>) -> Result<ToolResponse> {
+    async fn execute(&self, params: HashMap<String, serde_json::Value>) -> Result<ToolOutput> {
         let a = params.get("a").and_then(|v| v.as_f64()).unwrap_or(0.0);
         let b = params.get("b").and_then(|v| v.as_f64()).unwrap_or(0.0);
         let op = params.get("operation").and_then(|v| v.as_str()).unwrap_or("add");
@@ -47,13 +47,13 @@ impl Tool for CalculatorTool {
             "mul" => a * b,
             "div" => {
                 if b == 0.0 {
-                    return Ok(ToolResponse::error("Division by zero"));
+                    return Ok(ToolOutput::error("Division by zero"));
                 }
                 a / b
             }
-            _ => return Ok(ToolResponse::error("Unknown operation")),
+            _ => return Ok(ToolOutput::error("Unknown operation")),
         };
-        Ok(ToolResponse::success(serde_json::json!({ "result": result })))
+        Ok(ToolOutput::success(serde_json::json!({ "result": result })))
     }
 }
 
@@ -61,16 +61,16 @@ struct HiddenParamTool;
 
 #[async_trait]
 impl Tool for HiddenParamTool {
-    fn definition(&self) -> ToolDefinition {
-        ToolDefinition::new("hidden_param", "Hidden Param Tool", "Has hidden params", "utility")
+    fn definition(&self) -> ToolSpec {
+        ToolSpec::new("hidden_param", "Hidden Param Tool", "Has hidden params", "utility")
             .with_param("visible", ParameterSchema::string("Visible param"))
             .with_param("hidden", ParameterSchema::string("Hidden param").hidden())
             .with_param("llm_only", ParameterSchema::string("LLM only param").llm_only())
             .with_param("user_only", ParameterSchema::string("User only param").user_only())
     }
 
-    async fn execute(&self, _params: HashMap<String, serde_json::Value>) -> Result<ToolResponse> {
-        Ok(ToolResponse::success(serde_json::json!({})))
+    async fn execute(&self, _params: HashMap<String, serde_json::Value>) -> Result<ToolOutput> {
+        Ok(ToolOutput::success(serde_json::json!({})))
     }
 }
 
@@ -349,7 +349,7 @@ mod tool_execution {
 
     #[tokio::test]
     async fn test_tool_response_success_has_no_error() {
-        let response = ToolResponse::success(serde_json::json!({"data": "test"}));
+        let response = ToolOutput::success(serde_json::json!({"data": "test"}));
         assert!(response.success);
         assert!(response.error.is_none());
         assert!(response.timing.is_none());
@@ -357,7 +357,7 @@ mod tool_execution {
 
     #[tokio::test]
     async fn test_tool_response_error_has_null_output() {
-        let response = ToolResponse::error("Something failed");
+        let response = ToolOutput::error("Something failed");
         assert!(!response.success);
         assert_eq!(response.error, Some("Something failed".to_string()));
         assert!(response.output.is_null());
@@ -367,7 +367,7 @@ mod tool_execution {
     async fn test_tool_response_with_timing() {
         let start = chrono::Utc::now();
         let end = start + chrono::Duration::milliseconds(100);
-        let response = ToolResponse::success(serde_json::json!({})).with_timing(start, end);
+        let response = ToolOutput::success(serde_json::json!({})).with_timing(start, end);
         assert!(response.timing.is_some());
         let timing = response.timing.unwrap();
         assert_eq!(timing.duration_ms, 100);

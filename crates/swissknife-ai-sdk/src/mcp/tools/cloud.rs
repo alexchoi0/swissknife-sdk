@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -148,7 +148,7 @@ pub struct DropboxCreateFolderRequest {
     pub path: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl CloudTools {
     #[cfg(feature = "s3")]
     #[rmcp::tool(description = "List objects in an S3 bucket")]

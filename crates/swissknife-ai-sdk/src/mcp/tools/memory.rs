@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -223,7 +223,7 @@ pub struct LocalSearchSimilarRequest {
     pub limit: Option<u32>,
 }
 
-#[tool_box]
+#[tool_router]
 impl MemoryTools {
     #[cfg(feature = "mem0")]
     #[rmcp::tool(description = "Add a memory to Mem0")]

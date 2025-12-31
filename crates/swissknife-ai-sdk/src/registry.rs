@@ -1,6 +1,6 @@
 use crate::error::{Error, Result};
 use crate::tool::Tool;
-use crate::types::{ToolDefinition, ToolResponse};
+use crate::types::{ToolSpec, ToolOutput};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -62,11 +62,11 @@ impl ToolRegistry {
         categories
     }
 
-    pub fn definitions(&self) -> Vec<ToolDefinition> {
+    pub fn definitions(&self) -> Vec<ToolSpec> {
         self.tools.values().map(|t| t.definition()).collect()
     }
 
-    pub fn definitions_by_category(&self, category: &str) -> Vec<ToolDefinition> {
+    pub fn definitions_by_category(&self, category: &str) -> Vec<ToolSpec> {
         self.tools
             .values()
             .filter(|t| t.category() == category)
@@ -78,7 +78,7 @@ impl ToolRegistry {
         &self,
         tool_id: &str,
         params: HashMap<String, serde_json::Value>,
-    ) -> Result<ToolResponse> {
+    ) -> Result<ToolOutput> {
         let tool = self.get(tool_id).ok_or_else(|| Error::ToolNotFound(tool_id.to_string()))?;
         tool.execute(params).await
     }

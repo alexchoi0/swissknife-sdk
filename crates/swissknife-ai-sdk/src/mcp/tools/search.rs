@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -135,7 +135,7 @@ pub struct WikipediaPageRequest {
     pub title: String,
 }
 
-#[tool_box]
+#[tool_router]
 impl SearchTools {
     #[cfg(feature = "tavily")]
     #[rmcp::tool(description = "Search the web using Tavily AI-powered search")]

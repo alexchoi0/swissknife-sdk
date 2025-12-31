@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -135,7 +135,7 @@ pub struct GoogleCalendarCreateEventRequest {
     pub description: Option<String>,
 }
 
-#[tool_box]
+#[tool_router]
 impl ProductivityTools {
     #[cfg(feature = "notion")]
     #[rmcp::tool(description = "Search Notion pages and databases")]

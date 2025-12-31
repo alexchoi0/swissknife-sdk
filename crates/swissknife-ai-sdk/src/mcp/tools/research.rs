@@ -1,4 +1,4 @@
-use rmcp::tool_box;
+use rmcp::{tool_router, handler::server::router::tool::ToolRouter};
 use schemars::JsonSchema;
 use serde::Deserialize;
 
@@ -62,7 +62,7 @@ pub struct ArxivSearchByCategoryRequest {
     pub max_results: Option<u32>,
 }
 
-#[tool_box]
+#[tool_router]
 impl ResearchTools {
     #[cfg(feature = "arxiv")]
     #[rmcp::tool(description = "Search for papers on arXiv")]

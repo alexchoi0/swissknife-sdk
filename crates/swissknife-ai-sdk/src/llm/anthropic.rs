@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use super::{
     ChatMessage, ChatProvider, ChatRequest, ChatResponse, ChatChoice, ChatStreamEvent,
     ChatStreamResponse, MessageContent, MessageRole, ProviderConfig, StreamDelta, Usage,
-    VisionProvider, VisionRequest, VisionResponse, ContentPart,
+    VisionProvider, VisionRequest, VisionResponse, ContentPart, ThinkingConfig,
 };
 
 const API_BASE: &str = "https://api.anthropic.com/v1";
@@ -57,6 +57,8 @@ struct AnthropicRequest<'a> {
     tools: Option<Vec<AnthropicTool>>,
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     stream: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    thinking: Option<&'a ThinkingConfig>,
 }
 
 #[derive(Serialize)]
@@ -189,11 +191,12 @@ fn convert_request(request: &ChatRequest) -> AnthropicRequest {
         max_tokens: request.max_tokens.unwrap_or(4096),
         system,
         messages,
-        temperature: request.temperature,
+        temperature: if request.thinking.is_some() { None } else { request.temperature },
         top_p: request.top_p,
         stop_sequences: request.stop.as_ref(),
         tools,
         stream: false,
+        thinking: request.thinking.as_ref(),
     }
 }
 
@@ -209,6 +212,8 @@ struct AnthropicResponse {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type")]
 enum AnthropicResponseContent {
+    #[serde(rename = "thinking")]
+    Thinking { thinking: String },
     #[serde(rename = "text")]
     Text { text: String },
     #[serde(rename = "tool_use")]
@@ -223,10 +228,14 @@ struct AnthropicUsage {
 
 fn convert_response(resp: AnthropicResponse) -> ChatResponse {
     let mut text_content = String::new();
+    let mut thinking_content = String::new();
     let mut tool_calls = Vec::new();
 
     for content in resp.content {
         match content {
+            AnthropicResponseContent::Thinking { thinking } => {
+                thinking_content.push_str(&thinking);
+            }
             AnthropicResponseContent::Text { text } => {
                 text_content.push_str(&text);
             }
@@ -262,6 +271,7 @@ fn convert_response(resp: AnthropicResponse) -> ChatResponse {
             completion_tokens: resp.usage.output_tokens,
             total_tokens: resp.usage.input_tokens + resp.usage.output_tokens,
         }),
+        thinking: if thinking_content.is_empty() { None } else { Some(thinking_content) },
     }
 }
 
@@ -422,6 +432,7 @@ impl VisionProvider for AnthropicClient {
             tools: None,
             tool_choice: None,
             response_format: None,
+            thinking: None,
         };
 
         let response = self.chat(&chat_request).await?;

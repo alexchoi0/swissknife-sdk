@@ -21,6 +21,24 @@ pub struct ChatRequest {
     pub tool_choice: Option<ToolChoice>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub response_format: Option<ResponseFormat>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub thinking: Option<ThinkingConfig>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ThinkingConfig {
+    #[serde(rename = "type")]
+    pub thinking_type: String,
+    pub budget_tokens: u32,
+}
+
+impl ThinkingConfig {
+    pub fn enabled(budget_tokens: u32) -> Self {
+        Self {
+            thinking_type: "enabled".to_string(),
+            budget_tokens,
+        }
+    }
 }
 
 impl ChatRequest {
@@ -35,6 +53,7 @@ impl ChatRequest {
             tools: None,
             tool_choice: None,
             response_format: None,
+            thinking: None,
         }
     }
 
@@ -50,6 +69,11 @@ impl ChatRequest {
 
     pub fn with_tools(mut self, tools: Vec<ToolDefinition>) -> Self {
         self.tools = Some(tools);
+        self
+    }
+
+    pub fn with_thinking(mut self, budget_tokens: u32) -> Self {
+        self.thinking = Some(ThinkingConfig::enabled(budget_tokens));
         self
     }
 }
@@ -230,6 +254,8 @@ pub struct ChatResponse {
     pub model: String,
     pub choices: Vec<ChatChoice>,
     pub usage: Option<Usage>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub thinking: Option<String>,
 }
 
 impl ChatResponse {
@@ -244,6 +270,10 @@ impl ChatResponse {
 
     pub fn tool_calls(&self) -> Option<&[ToolCall]> {
         self.choices.first().and_then(|c| c.message.tool_calls.as_deref())
+    }
+
+    pub fn thinking(&self) -> Option<&str> {
+        self.thinking.as_deref()
     }
 }
 

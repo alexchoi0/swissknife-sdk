@@ -1,23 +1,26 @@
 use std::io::{self, BufRead, Write};
 use swissknife_ai_sdk::llm::anthropic::AnthropicClient;
 use swissknife_ai_sdk::llm::voyage::VoyageClient;
-use swissknife_ai_sdk::llm::{ChatMessage, ChatProvider, ChatRequest, EmbeddingProvider, EmbeddingRequest};
+use swissknife_ai_sdk::llm::{ChatMessage, ChatProvider, ChatRequest, ChatResponse, EmbeddingProvider, EmbeddingRequest};
 use swissknife_ai_sdk::memory::{ActionType, DuckDBMemory, MemoryConfig};
 use uuid::Uuid;
 
 const CHAT_MODEL: &str = "claude-3-5-haiku-20241022";
+const THINKING_MODEL: &str = "claude-sonnet-4-20250514";
 const EMBEDDING_MODEL: &str = "voyage-code-3";
-const MAX_TOKENS: u32 = 1024;
+const MAX_TOKENS: u32 = 16000;
+const THINKING_BUDGET: u32 = 10000;
 
 struct Secretary {
     chat_client: AnthropicClient,
     embedding_client: Option<VoyageClient>,
     memory: DuckDBMemory,
     session_id: String,
+    thinking_enabled: bool,
 }
 
 impl Secretary {
-    fn new(session_id: Option<String>) -> Result<Self, Box<dyn std::error::Error>> {
+    fn new(session_id: Option<String>, thinking_enabled: bool) -> Result<Self, Box<dyn std::error::Error>> {
         let anthropic_key = std::env::var("ANTHROPIC_API_KEY")
             .map_err(|_| "ANTHROPIC_API_KEY not found")?;
 
@@ -55,11 +58,16 @@ impl Secretary {
             }
         };
 
+        if thinking_enabled {
+            eprintln!("Extended thinking enabled (budget: {} tokens)", THINKING_BUDGET);
+        }
+
         Ok(Self {
             chat_client: AnthropicClient::from_api_key(anthropic_key),
             embedding_client,
             memory,
             session_id,
+            thinking_enabled,
         })
     }
 
@@ -119,13 +127,16 @@ impl Secretary {
         }
     }
 
-    async fn chat(&self, messages: &[ChatMessage]) -> Result<String, Box<dyn std::error::Error>> {
-        let request = ChatRequest::new(CHAT_MODEL, messages.to_vec()).with_max_tokens(MAX_TOKENS);
+    async fn chat(&self, messages: &[ChatMessage]) -> Result<ChatResponse, Box<dyn std::error::Error>> {
+        let model = if self.thinking_enabled { THINKING_MODEL } else { CHAT_MODEL };
+        let mut request = ChatRequest::new(model, messages.to_vec()).with_max_tokens(MAX_TOKENS);
+
+        if self.thinking_enabled {
+            request = request.with_thinking(THINKING_BUDGET);
+        }
+
         let response = self.chat_client.chat(&request).await?;
-        response
-            .content()
-            .map(|s| s.to_string())
-            .ok_or_else(|| "Empty response".into())
+        Ok(response)
     }
 
     fn update_title_if_needed(&self) -> Result<(), Box<dyn std::error::Error>> {
@@ -251,9 +262,14 @@ impl Secretary {
 
             match self.chat(&messages).await {
                 Ok(response) => {
-                    println!("Secretary: {}", response);
-                    self.store_message("assistant", &response).await?;
-                    messages.push(ChatMessage::assistant(&response));
+                    if let Some(thinking) = response.thinking() {
+                        println!("\n💭 Thinking:\n{}\n", thinking);
+                        self.memory.add_thinking(&self.session_id, thinking)?;
+                    }
+                    let content = response.content().unwrap_or("");
+                    println!("Secretary: {}", content);
+                    self.store_message("assistant", content).await?;
+                    messages.push(ChatMessage::assistant(content));
                     self.update_title_if_needed()?;
                 }
                 Err(e) => {
@@ -280,7 +296,9 @@ async fn main() {
         None
     };
 
-    match Secretary::new(session_id) {
+    let thinking_enabled = args.contains(&"--think".to_string());
+
+    match Secretary::new(session_id, thinking_enabled) {
         Ok(secretary) => {
             if let Err(e) = secretary.run().await {
                 eprintln!("Error: {}", e);

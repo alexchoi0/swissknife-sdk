@@ -113,7 +113,7 @@ impl DuckDBMemory {
     pub fn get_session(&self, session_id: &str) -> Result<Option<Session>> {
         let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
         let mut stmt = conn
-            .prepare("SELECT id, session_id, created_at, updated_at, title FROM sessions WHERE session_id = ?")
+            .prepare("SELECT id, session_id, created_at::VARCHAR, updated_at::VARCHAR, title FROM sessions WHERE session_id = ?")
             .map_err(|e| Error::Internal(e.to_string()))?;
         let mut rows = stmt.query(params![session_id]).map_err(|e| Error::Internal(e.to_string()))?;
 
@@ -136,7 +136,7 @@ impl DuckDBMemory {
     pub fn list_sessions(&self, limit: usize) -> Result<Vec<Session>> {
         let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
         let mut stmt = conn
-            .prepare("SELECT id, session_id, created_at, updated_at, title FROM sessions ORDER BY updated_at DESC LIMIT ?")
+            .prepare("SELECT id, session_id, created_at::VARCHAR, updated_at::VARCHAR, title FROM sessions ORDER BY updated_at DESC LIMIT ?")
             .map_err(|e| Error::Internal(e.to_string()))?;
         let mut rows = stmt.query(params![limit as i64]).map_err(|e| Error::Internal(e.to_string()))?;
 
@@ -245,7 +245,7 @@ impl DuckDBMemory {
         let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
         let mut stmt = conn
             .prepare(
-                "SELECT id, session_id, sequence, action_type, role, content, tool_name, tool_input, tool_call_id, created_at, updated_at
+                "SELECT id, session_id, sequence, action_type, role, content, tool_name, tool_input, tool_call_id, created_at::VARCHAR, updated_at::VARCHAR
                  FROM actions WHERE session_id = ? ORDER BY sequence ASC"
             )
             .map_err(|e| Error::Internal(e.to_string()))?;
@@ -257,7 +257,7 @@ impl DuckDBMemory {
         let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
         let mut stmt = conn
             .prepare(
-                "SELECT id, session_id, sequence, action_type, role, content, tool_name, tool_input, tool_call_id, created_at, updated_at
+                "SELECT id, session_id, sequence, action_type, role, content, tool_name, tool_input, tool_call_id, created_at::VARCHAR, updated_at::VARCHAR
                  FROM actions WHERE session_id = ? AND action_type = ? ORDER BY sequence ASC"
             )
             .map_err(|e| Error::Internal(e.to_string()))?;
@@ -313,7 +313,7 @@ impl DuckDBMemory {
         let query = format!(
             r#"
             SELECT a.id, a.session_id, a.sequence, a.action_type, a.role, a.content,
-                   a.tool_name, a.tool_input, a.tool_call_id, a.created_at, a.updated_at,
+                   a.tool_name, a.tool_input, a.tool_call_id, a.created_at::VARCHAR, a.updated_at::VARCHAR,
                    array_cosine_similarity(e.embedding, {}::FLOAT[{}]) as similarity
             FROM embeddings e
             JOIN actions a ON e.action_id = a.id

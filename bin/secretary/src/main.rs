@@ -5,6 +5,7 @@ mod commands;
 mod config;
 mod db;
 mod format;
+mod security;
 mod tools;
 
 use app::App;

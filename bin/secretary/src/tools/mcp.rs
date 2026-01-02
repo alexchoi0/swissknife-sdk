@@ -1,3 +1,4 @@
+use crate::security::ssrf::{validate_url_for_fetch, HTTP_TIMEOUT, MAX_RESPONSE_SIZE};
 use rmcp::{
     model::{CallToolRequestParam, Tool},
     service::{RoleClient, RunningService, ServiceError},
@@ -195,16 +196,66 @@ impl SdkToolServer {
         &self,
         Parameters(req): Parameters<WebFetchRequest>,
     ) -> Result<String, String> {
-        let client = reqwest::Client::new();
+        let (validated_url, pinned_addr) = validate_url_for_fetch(&req.url).await?;
+
+        let host = validated_url
+            .host_str()
+            .ok_or_else(|| "URL must have a host".to_string())?;
+
+        let client = reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::none())
+            .timeout(HTTP_TIMEOUT)
+            .resolve(host, pinned_addr)
+            .build()
+            .map_err(|e| format!("Failed to create HTTP client: {}", e))?;
+
         let response = client
-            .get(&req.url)
+            .get(validated_url.as_str())
             .header("User-Agent", "Mozilla/5.0 (compatible; Secretary/1.0)")
             .send()
             .await
             .map_err(|e| e.to_string())?;
 
         let status = response.status();
-        let text = response.text().await.map_err(|e| e.to_string())?;
+
+        if status.is_redirection() {
+            if let Some(location) = response.headers().get("location") {
+                let location_str = location
+                    .to_str()
+                    .unwrap_or("<invalid location header>");
+                return Ok(format!(
+                    "Status: {} (Redirect)\nRedirects are disabled for security. Location header: {}",
+                    status, location_str
+                ));
+            }
+            return Ok(format!(
+                "Status: {} (Redirect)\nRedirects are disabled for security.",
+                status
+            ));
+        }
+
+        let content_length = response
+            .content_length()
+            .unwrap_or(0) as usize;
+
+        if content_length > MAX_RESPONSE_SIZE {
+            return Err(format!(
+                "Response too large: {} bytes (max {} bytes)",
+                content_length, MAX_RESPONSE_SIZE
+            ));
+        }
+
+        let bytes = response.bytes().await.map_err(|e| e.to_string())?;
+
+        if bytes.len() > MAX_RESPONSE_SIZE {
+            return Err(format!(
+                "Response too large: {} bytes (max {} bytes)",
+                bytes.len(),
+                MAX_RESPONSE_SIZE
+            ));
+        }
+
+        let text = String::from_utf8_lossy(&bytes);
 
         if text.len() > 10000 {
             Ok(format!(

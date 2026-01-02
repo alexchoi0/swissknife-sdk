@@ -5,6 +5,7 @@ mod commands;
 mod config;
 mod db;
 mod format;
+mod security;
 mod tools;
 
 use app::App;
@@ -18,6 +19,8 @@ use uuid::Uuid;
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
+
+    security::init_sensitive_inodes();
 
     let cli = Cli::parse();
 

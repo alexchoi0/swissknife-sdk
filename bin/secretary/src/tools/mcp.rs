@@ -27,12 +27,14 @@ pub struct McpClient {
 
 impl McpClient {
     pub async fn spawn(name: &str, command: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let parts: Vec<&str> = command.split_whitespace().collect();
+        let parts = shell_words::split(command)
+            .map_err(|e| format!("Invalid command syntax: {}", e))?;
+
         if parts.is_empty() {
             return Err("Empty command".into());
         }
 
-        let mut cmd = Command::new(parts[0]);
+        let mut cmd = Command::new(&parts[0]);
         if parts.len() > 1 {
             cmd.args(&parts[1..]);
         }

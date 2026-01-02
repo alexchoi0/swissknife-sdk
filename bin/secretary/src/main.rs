@@ -4,8 +4,11 @@ mod cli;
 mod commands;
 mod config;
 mod db;
+mod error;
 mod format;
 mod tools;
+
+pub use error::{Result, ResultExt, SecretaryError};
 
 use app::App;
 use chat::{run_repl, ChatEngine, SessionManager};

@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::path::Path;
-use std::process::Command;
 use swissknife_ai_sdk::llm::{FunctionDefinition, ToolDefinition};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -19,17 +18,6 @@ pub struct SearchFilesArgs {
     pub pattern: String,
     #[serde(default)]
     pub path: Option<String>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ExecuteCommandArgs {
-    pub command: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct WriteFileArgs {
-    pub path: String,
-    pub content: String,
 }
 
 pub fn get_builtin_definitions() -> Vec<ToolDefinition> {
@@ -89,44 +77,6 @@ pub fn get_builtin_definitions() -> Vec<ToolDefinition> {
                 }),
             },
         },
-        ToolDefinition {
-            tool_type: "function".to_string(),
-            function: FunctionDefinition {
-                name: "execute_command".to_string(),
-                description: Some("Execute a shell command and return its output".to_string()),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "command": {
-                            "type": "string",
-                            "description": "The shell command to execute"
-                        }
-                    },
-                    "required": ["command"]
-                }),
-            },
-        },
-        ToolDefinition {
-            tool_type: "function".to_string(),
-            function: FunctionDefinition {
-                name: "write_file".to_string(),
-                description: Some("Write content to a file at the given path".to_string()),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "path": {
-                            "type": "string",
-                            "description": "The path to the file to write"
-                        },
-                        "content": {
-                            "type": "string",
-                            "description": "The content to write to the file"
-                        }
-                    },
-                    "required": ["path", "content"]
-                }),
-            },
-        },
     ]
 }
 
@@ -146,16 +96,6 @@ pub fn execute_builtin(name: &str, arguments: &str) -> Result<String, String> {
             let args: SearchFilesArgs =
                 serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
             search_files(&args.pattern, args.path.as_deref())
-        }
-        "execute_command" => {
-            let args: ExecuteCommandArgs =
-                serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
-            execute_command(&args.command)
-        }
-        "write_file" => {
-            let args: WriteFileArgs =
-                serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
-            write_file(&args.path, &args.content)
         }
         _ => Err(format!("Unknown builtin tool: {}", name)),
     }
@@ -219,54 +159,4 @@ fn search_files(pattern: &str, base_path: Option<&str>) -> Result<String, String
     } else {
         Ok(paths.join("\n"))
     }
-}
-
-fn execute_command(command: &str) -> Result<String, String> {
-    let output = if cfg!(target_os = "windows") {
-        Command::new("cmd").args(["/C", command]).output()
-    } else {
-        Command::new("sh").args(["-c", command]).output()
-    };
-
-    match output {
-        Ok(output) => {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            let stderr = String::from_utf8_lossy(&output.stderr);
-
-            if output.status.success() {
-                if stderr.is_empty() {
-                    Ok(stdout.to_string())
-                } else {
-                    Ok(format!("{}\n\nStderr:\n{}", stdout, stderr))
-                }
-            } else {
-                Err(format!(
-                    "Command failed with exit code {:?}\nStdout:\n{}\nStderr:\n{}",
-                    output.status.code(),
-                    stdout,
-                    stderr
-                ))
-            }
-        }
-        Err(e) => Err(format!("Failed to execute command: {}", e)),
-    }
-}
-
-fn write_file(path: &str, content: &str) -> Result<String, String> {
-    let path = Path::new(path);
-
-    if let Some(parent) = path.parent() {
-        if !parent.exists() {
-            std::fs::create_dir_all(parent)
-                .map_err(|e| format!("Failed to create directories: {}", e))?;
-        }
-    }
-
-    std::fs::write(path, content).map_err(|e| format!("Failed to write file: {}", e))?;
-
-    Ok(format!(
-        "Successfully wrote {} bytes to {}",
-        content.len(),
-        path.display()
-    ))
 }

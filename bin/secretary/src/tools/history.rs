@@ -1,3 +1,4 @@
+use crate::format::truncate_str;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use swissknife_ai_sdk::llm::{FunctionDefinition, ToolDefinition};
@@ -78,7 +79,7 @@ fn search_history(query: &str, limit: usize, memory: &DuckDBMemory) -> Result<St
             let preview: String = content.chars().take(500).collect();
             results.push(format!(
                 "[Session: {}] Role: {}\nContent: {}\n",
-                &msg.session_id[..8.min(msg.session_id.len())],
+                truncate_str(&msg.session_id, 8),
                 role,
                 preview
             ));

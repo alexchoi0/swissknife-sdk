@@ -4,6 +4,13 @@ pub const SESSION_ID_LEN: usize = 8;
 pub const PREVIEW_SHORT: usize = 60;
 pub const PREVIEW_LONG: usize = 80;
 
+pub fn truncate_str(s: &str, max_chars: usize) -> &str {
+    match s.char_indices().nth(max_chars) {
+        Some((idx, _)) => &s[..idx],
+        None => s,
+    }
+}
+
 pub fn truncate(text: &str, max: usize) -> String {
     text.chars().take(max).collect()
 }
@@ -13,7 +20,7 @@ pub fn format_session(session: &Session, current_id: Option<&str>) -> String {
     format!(
         "{}{}: {} ({})",
         marker,
-        &session.session_id[..SESSION_ID_LEN.min(session.session_id.len())],
+        truncate_str(&session.session_id, SESSION_ID_LEN),
         session.title.as_deref().unwrap_or("Untitled"),
         session.updated_at.format("%Y-%m-%d %H:%M")
     )

@@ -32,7 +32,7 @@ pub struct WriteFileArgs {
     pub content: String,
 }
 
-pub fn get_tool_definitions() -> Vec<ToolDefinition> {
+pub fn get_builtin_definitions() -> Vec<ToolDefinition> {
     vec![
         ToolDefinition {
             tool_type: "function".to_string(),
@@ -130,34 +130,34 @@ pub fn get_tool_definitions() -> Vec<ToolDefinition> {
     ]
 }
 
-pub fn execute_tool(name: &str, arguments: &str) -> Result<String, String> {
+pub fn execute_builtin(name: &str, arguments: &str) -> Result<String, String> {
     match name {
         "read_file" => {
-            let args: ReadFileArgs = serde_json::from_str(arguments)
-                .map_err(|e| format!("Invalid arguments: {}", e))?;
+            let args: ReadFileArgs =
+                serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
             read_file(&args.path)
         }
         "list_directory" => {
-            let args: ListDirectoryArgs = serde_json::from_str(arguments)
-                .map_err(|e| format!("Invalid arguments: {}", e))?;
+            let args: ListDirectoryArgs =
+                serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
             list_directory(&args.path)
         }
         "search_files" => {
-            let args: SearchFilesArgs = serde_json::from_str(arguments)
-                .map_err(|e| format!("Invalid arguments: {}", e))?;
+            let args: SearchFilesArgs =
+                serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
             search_files(&args.pattern, args.path.as_deref())
         }
         "execute_command" => {
-            let args: ExecuteCommandArgs = serde_json::from_str(arguments)
-                .map_err(|e| format!("Invalid arguments: {}", e))?;
+            let args: ExecuteCommandArgs =
+                serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
             execute_command(&args.command)
         }
         "write_file" => {
-            let args: WriteFileArgs = serde_json::from_str(arguments)
-                .map_err(|e| format!("Invalid arguments: {}", e))?;
+            let args: WriteFileArgs =
+                serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
             write_file(&args.path, &args.content)
         }
-        _ => Err(format!("Unknown tool: {}", name)),
+        _ => Err(format!("Unknown builtin tool: {}", name)),
     }
 }
 
@@ -166,8 +166,7 @@ fn read_file(path: &str) -> Result<String, String> {
     if !path.exists() {
         return Err(format!("File not found: {}", path.display()));
     }
-    std::fs::read_to_string(path)
-        .map_err(|e| format!("Failed to read file: {}", e))
+    std::fs::read_to_string(path).map_err(|e| format!("Failed to read file: {}", e))
 }
 
 fn list_directory(path: &str) -> Result<String, String> {
@@ -180,13 +179,21 @@ fn list_directory(path: &str) -> Result<String, String> {
     }
 
     let mut entries = Vec::new();
-    let read_dir = std::fs::read_dir(path)
-        .map_err(|e| format!("Failed to read directory: {}", e))?;
+    let read_dir =
+        std::fs::read_dir(path).map_err(|e| format!("Failed to read directory: {}", e))?;
 
     for entry in read_dir {
         let entry = entry.map_err(|e| format!("Failed to read entry: {}", e))?;
-        let file_type = if entry.path().is_dir() { "dir" } else { "file" };
-        entries.push(format!("[{}] {}", file_type, entry.file_name().to_string_lossy()));
+        let file_type = if entry.path().is_dir() {
+            "dir"
+        } else {
+            "file"
+        };
+        entries.push(format!(
+            "[{}] {}",
+            file_type,
+            entry.file_name().to_string_lossy()
+        ));
     }
 
     entries.sort();
@@ -216,13 +223,9 @@ fn search_files(pattern: &str, base_path: Option<&str>) -> Result<String, String
 
 fn execute_command(command: &str) -> Result<String, String> {
     let output = if cfg!(target_os = "windows") {
-        Command::new("cmd")
-            .args(["/C", command])
-            .output()
+        Command::new("cmd").args(["/C", command]).output()
     } else {
-        Command::new("sh")
-            .args(["-c", command])
-            .output()
+        Command::new("sh").args(["-c", command]).output()
     };
 
     match output {
@@ -237,8 +240,12 @@ fn execute_command(command: &str) -> Result<String, String> {
                     Ok(format!("{}\n\nStderr:\n{}", stdout, stderr))
                 }
             } else {
-                Err(format!("Command failed with exit code {:?}\nStdout:\n{}\nStderr:\n{}",
-                    output.status.code(), stdout, stderr))
+                Err(format!(
+                    "Command failed with exit code {:?}\nStdout:\n{}\nStderr:\n{}",
+                    output.status.code(),
+                    stdout,
+                    stderr
+                ))
             }
         }
         Err(e) => Err(format!("Failed to execute command: {}", e)),
@@ -255,8 +262,11 @@ fn write_file(path: &str, content: &str) -> Result<String, String> {
         }
     }
 
-    std::fs::write(path, content)
-        .map_err(|e| format!("Failed to write file: {}", e))?;
+    std::fs::write(path, content).map_err(|e| format!("Failed to write file: {}", e))?;
 
-    Ok(format!("Successfully wrote {} bytes to {}", content.len(), path.display()))
+    Ok(format!(
+        "Successfully wrote {} bytes to {}",
+        content.len(),
+        path.display()
+    ))
 }

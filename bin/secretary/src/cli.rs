@@ -28,6 +28,10 @@ pub struct Cli {
     /// Custom config file path
     #[arg(short, long, global = true)]
     pub config: Option<PathBuf>,
+
+    /// Model to use (e.g., haiku, sonnet, opus, or full model ID)
+    #[arg(short, long, global = true)]
+    pub model: Option<String>,
 }
 
 #[derive(Subcommand)]

@@ -14,11 +14,6 @@ fn default_limit() -> usize {
     20
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct QueryHistoryArgs {
-    pub sql: String,
-}
-
 pub fn get_history_definitions() -> Vec<ToolDefinition> {
     vec![
         ToolDefinition {
@@ -42,23 +37,6 @@ pub fn get_history_definitions() -> Vec<ToolDefinition> {
                 }),
             },
         },
-        ToolDefinition {
-            tool_type: "function".to_string(),
-            function: FunctionDefinition {
-                name: "query_history".to_string(),
-                description: Some("Run a SQL query against the Claude Code history database. Available tables: claude_prompts (id, display, timestamp, project, session_id), claude_messages (id, uuid, session_id, message_type, role, content, thinking, tool_use, cwd, git_branch), claude_todos (id, session_id, content, status)".to_string()),
-                parameters: json!({
-                    "type": "object",
-                    "properties": {
-                        "sql": {
-                            "type": "string",
-                            "description": "The SQL query to execute"
-                        }
-                    },
-                    "required": ["sql"]
-                }),
-            },
-        },
     ]
 }
 
@@ -72,11 +50,6 @@ pub fn execute_history(
             let args: SearchHistoryArgs =
                 serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
             search_history(&args.query, args.limit, memory)
-        }
-        "query_history" => {
-            let args: QueryHistoryArgs =
-                serde_json::from_str(arguments).map_err(|e| format!("Invalid arguments: {}", e))?;
-            query_history(&args.sql, memory)
         }
         _ => Err(format!("Unknown history tool: {}", name)),
     }
@@ -121,26 +94,4 @@ fn search_history(query: &str, limit: usize, memory: &DuckDBMemory) -> Result<St
             results.join("\n---\n")
         ))
     }
-}
-
-fn query_history(sql: &str, memory: &DuckDBMemory) -> Result<String, String> {
-    let rows = memory
-        .execute_sql(sql)
-        .map_err(|e| format!("SQL error: {}", e))?;
-
-    if rows.is_empty() {
-        return Ok("No results".to_string());
-    }
-
-    let mut output = Vec::new();
-    for (i, row) in rows.iter().enumerate() {
-        if i == 0 {
-            output.push(row.join(" | "));
-            output.push("-".repeat(row.iter().map(|s| s.len() + 3).sum::<usize>()));
-        } else {
-            output.push(row.join(" | "));
-        }
-    }
-
-    Ok(output.join("\n"))
 }

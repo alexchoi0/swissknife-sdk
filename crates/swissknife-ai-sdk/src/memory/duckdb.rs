@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
-use super::{Action, ActionType, MemoryConfig, SearchResult, Session};
+use super::{Action, ActionType, ClaudeMessage, ClaudePrompt, ClaudeTodo, MemoryConfig, SearchResult, Session};
 use crate::{Error, Result};
 
 pub struct DuckDBMemory {
@@ -89,6 +89,46 @@ impl DuckDBMemory {
             CREATE INDEX IF NOT EXISTS idx_actions_session_id ON actions(session_id, sequence);
             CREATE INDEX IF NOT EXISTS idx_actions_type ON actions(action_type);
             CREATE INDEX IF NOT EXISTS idx_actions_tool_name ON actions(tool_name);
+
+            CREATE TABLE IF NOT EXISTS claude_prompts (
+                id VARCHAR PRIMARY KEY,
+                display TEXT NOT NULL,
+                timestamp BIGINT NOT NULL,
+                project VARCHAR,
+                session_id VARCHAR,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS claude_messages (
+                id VARCHAR PRIMARY KEY,
+                uuid VARCHAR NOT NULL UNIQUE,
+                parent_uuid VARCHAR,
+                session_id VARCHAR NOT NULL,
+                message_type VARCHAR NOT NULL,
+                timestamp VARCHAR NOT NULL,
+                role VARCHAR,
+                content TEXT,
+                thinking TEXT,
+                tool_use TEXT,
+                cwd VARCHAR,
+                git_branch VARCHAR,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS claude_todos (
+                id VARCHAR PRIMARY KEY,
+                session_id VARCHAR NOT NULL,
+                agent_id VARCHAR NOT NULL,
+                content TEXT NOT NULL,
+                status VARCHAR NOT NULL,
+                active_form TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE INDEX IF NOT EXISTS idx_claude_prompts_project ON claude_prompts(project);
+            CREATE INDEX IF NOT EXISTS idx_claude_prompts_timestamp ON claude_prompts(timestamp);
+            CREATE INDEX IF NOT EXISTS idx_claude_messages_session ON claude_messages(session_id);
+            CREATE INDEX IF NOT EXISTS idx_claude_todos_session ON claude_todos(session_id);
             "#,
             dim = self.embedding_dim
         );
@@ -393,6 +433,192 @@ impl DuckDBMemory {
             actions.push(self.parse_action_row(row)?);
         }
         Ok(actions)
+    }
+
+    pub fn add_claude_prompt(&self, prompt: &ClaudePrompt) -> Result<String> {
+        let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
+        conn.execute(
+            "INSERT INTO claude_prompts (id, display, timestamp, project, session_id, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+            params![prompt.id, prompt.display, prompt.timestamp, prompt.project, prompt.session_id, prompt.created_at.to_rfc3339()],
+        ).map_err(|e| Error::Internal(e.to_string()))?;
+        Ok(prompt.id.clone())
+    }
+
+    pub fn add_claude_message(&self, message: &ClaudeMessage) -> Result<String> {
+        let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
+        conn.execute(
+            "INSERT INTO claude_messages (id, uuid, parent_uuid, session_id, message_type, timestamp, role, content, thinking, tool_use, cwd, git_branch, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            params![message.id, message.uuid, message.parent_uuid, message.session_id, message.message_type, message.timestamp, message.role, message.content, message.thinking, message.tool_use, message.cwd, message.git_branch, message.created_at.to_rfc3339()],
+        ).map_err(|e| Error::Internal(e.to_string()))?;
+        Ok(message.id.clone())
+    }
+
+    pub fn add_claude_todo(&self, todo: &ClaudeTodo) -> Result<String> {
+        let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
+        conn.execute(
+            "INSERT INTO claude_todos (id, session_id, agent_id, content, status, active_form, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            params![todo.id, todo.session_id, todo.agent_id, todo.content, todo.status, todo.active_form, todo.created_at.to_rfc3339()],
+        ).map_err(|e| Error::Internal(e.to_string()))?;
+        Ok(todo.id.clone())
+    }
+
+    pub fn get_claude_prompts(&self, project: Option<&str>, limit: usize) -> Result<Vec<ClaudePrompt>> {
+        let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
+        let mut prompts = Vec::new();
+        if let Some(proj) = project {
+            let mut stmt = conn
+                .prepare("SELECT id, display, timestamp, project, session_id, created_at::VARCHAR FROM claude_prompts WHERE project = ? ORDER BY timestamp DESC LIMIT ?")
+                .map_err(|e| Error::Internal(e.to_string()))?;
+            let mut rows = stmt.query(params![proj, limit as i64]).map_err(|e| Error::Internal(e.to_string()))?;
+            while let Some(row) = rows.next().map_err(|e| Error::Internal(e.to_string()))? {
+                prompts.push(self.parse_claude_prompt(row)?);
+            }
+        } else {
+            let mut stmt = conn
+                .prepare("SELECT id, display, timestamp, project, session_id, created_at::VARCHAR FROM claude_prompts ORDER BY timestamp DESC LIMIT ?")
+                .map_err(|e| Error::Internal(e.to_string()))?;
+            let mut rows = stmt.query(params![limit as i64]).map_err(|e| Error::Internal(e.to_string()))?;
+            while let Some(row) = rows.next().map_err(|e| Error::Internal(e.to_string()))? {
+                prompts.push(self.parse_claude_prompt(row)?);
+            }
+        }
+        Ok(prompts)
+    }
+
+    pub fn search_claude_prompts(&self, query: &str, limit: usize) -> Result<Vec<ClaudePrompt>> {
+        let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
+        let search_pattern = format!("%{}%", query);
+        let mut stmt = conn
+            .prepare("SELECT id, display, timestamp, project, session_id, created_at::VARCHAR FROM claude_prompts WHERE display ILIKE ? ORDER BY timestamp DESC LIMIT ?")
+            .map_err(|e| Error::Internal(e.to_string()))?;
+        let mut rows = stmt.query(params![search_pattern, limit as i64]).map_err(|e| Error::Internal(e.to_string()))?;
+        let mut prompts = Vec::new();
+        while let Some(row) = rows.next().map_err(|e| Error::Internal(e.to_string()))? {
+            prompts.push(self.parse_claude_prompt(row)?);
+        }
+        Ok(prompts)
+    }
+
+    fn parse_claude_prompt(&self, row: &duckdb::Row) -> Result<ClaudePrompt> {
+        let created_str: String = row.get(5).map_err(|e| Error::Internal(e.to_string()))?;
+        Ok(ClaudePrompt {
+            id: row.get(0).map_err(|e| Error::Internal(e.to_string()))?,
+            display: row.get(1).map_err(|e| Error::Internal(e.to_string()))?,
+            timestamp: row.get(2).map_err(|e| Error::Internal(e.to_string()))?,
+            project: row.get(3).map_err(|e| Error::Internal(e.to_string()))?,
+            session_id: row.get(4).map_err(|e| Error::Internal(e.to_string()))?,
+            created_at: DateTime::parse_from_rfc3339(&created_str)
+                .map(|dt| dt.with_timezone(&Utc))
+                .unwrap_or_else(|_| Utc::now()),
+        })
+    }
+
+    pub fn get_claude_messages(&self, session_id: &str, limit: usize) -> Result<Vec<ClaudeMessage>> {
+        let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
+        let pattern = format!("{}%", session_id);
+        let mut stmt = conn
+            .prepare("SELECT id, uuid, parent_uuid, session_id, message_type, timestamp, role, content, thinking, tool_use, cwd, git_branch, created_at::VARCHAR FROM claude_messages WHERE session_id LIKE ? ORDER BY timestamp ASC LIMIT ?")
+            .map_err(|e| Error::Internal(e.to_string()))?;
+        let mut rows = stmt.query(params![pattern, limit as i64]).map_err(|e| Error::Internal(e.to_string()))?;
+        let mut messages = Vec::new();
+        while let Some(row) = rows.next().map_err(|e| Error::Internal(e.to_string()))? {
+            messages.push(self.parse_claude_message(row)?);
+        }
+        Ok(messages)
+    }
+
+    pub fn search_claude_messages(&self, query: &str, limit: usize) -> Result<Vec<ClaudeMessage>> {
+        let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
+        let pattern = format!("%{}%", query);
+        let mut stmt = conn
+            .prepare("SELECT id, uuid, parent_uuid, session_id, message_type, timestamp, role, content, thinking, tool_use, cwd, git_branch, created_at::VARCHAR FROM claude_messages WHERE content ILIKE ? OR thinking ILIKE ? ORDER BY timestamp DESC LIMIT ?")
+            .map_err(|e| Error::Internal(e.to_string()))?;
+        let mut rows = stmt.query(params![pattern.clone(), pattern, limit as i64]).map_err(|e| Error::Internal(e.to_string()))?;
+        let mut messages = Vec::new();
+        while let Some(row) = rows.next().map_err(|e| Error::Internal(e.to_string()))? {
+            messages.push(self.parse_claude_message(row)?);
+        }
+        Ok(messages)
+    }
+
+    fn parse_claude_message(&self, row: &duckdb::Row) -> Result<ClaudeMessage> {
+        let created_str: String = row.get(12).map_err(|e| Error::Internal(e.to_string()))?;
+        Ok(ClaudeMessage {
+            id: row.get(0).map_err(|e| Error::Internal(e.to_string()))?,
+            uuid: row.get(1).map_err(|e| Error::Internal(e.to_string()))?,
+            parent_uuid: row.get(2).map_err(|e| Error::Internal(e.to_string()))?,
+            session_id: row.get(3).map_err(|e| Error::Internal(e.to_string()))?,
+            message_type: row.get(4).map_err(|e| Error::Internal(e.to_string()))?,
+            timestamp: row.get(5).map_err(|e| Error::Internal(e.to_string()))?,
+            role: row.get(6).map_err(|e| Error::Internal(e.to_string()))?,
+            content: row.get(7).map_err(|e| Error::Internal(e.to_string()))?,
+            thinking: row.get(8).map_err(|e| Error::Internal(e.to_string()))?,
+            tool_use: row.get(9).map_err(|e| Error::Internal(e.to_string()))?,
+            cwd: row.get(10).map_err(|e| Error::Internal(e.to_string()))?,
+            git_branch: row.get(11).map_err(|e| Error::Internal(e.to_string()))?,
+            created_at: DateTime::parse_from_rfc3339(&created_str)
+                .map(|dt| dt.with_timezone(&Utc))
+                .unwrap_or_else(|_| Utc::now()),
+        })
+    }
+
+    pub fn get_history_stats(&self) -> Result<(i64, i64, i64)> {
+        let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
+
+        let prompt_count: i64 = conn
+            .query_row("SELECT COUNT(*) FROM claude_prompts", [], |row| row.get(0))
+            .map_err(|e| Error::Internal(e.to_string()))?;
+
+        let message_count: i64 = conn
+            .query_row("SELECT COUNT(*) FROM claude_messages", [], |row| row.get(0))
+            .map_err(|e| Error::Internal(e.to_string()))?;
+
+        let todo_count: i64 = conn
+            .query_row("SELECT COUNT(*) FROM claude_todos", [], |row| row.get(0))
+            .map_err(|e| Error::Internal(e.to_string()))?;
+
+        Ok((prompt_count, message_count, todo_count))
+    }
+
+    pub fn execute_sql(&self, query: &str) -> Result<Vec<Vec<String>>> {
+        let conn = self.conn.lock().map_err(|e| Error::Internal(e.to_string()))?;
+        let mut stmt = conn.prepare(query).map_err(|e| Error::Internal(e.to_string()))?;
+
+        let mut results = Vec::new();
+        let mut rows = stmt.query([]).map_err(|e| Error::Internal(e.to_string()))?;
+        let mut first = true;
+
+        while let Some(row) = rows.next().map_err(|e| Error::Internal(e.to_string()))? {
+            let col_count = row.as_ref().column_count();
+            if first {
+                let mut col_names = Vec::new();
+                for i in 0..col_count {
+                    col_names.push(row.as_ref().column_name(i).map_or("?".to_string(), |v| v.to_string()));
+                }
+                results.push(col_names);
+                first = false;
+            }
+            let mut row_data = Vec::new();
+            for i in 0..col_count {
+                let val: duckdb::types::Value = row.get(i).unwrap_or(duckdb::types::Value::Null);
+                let s = match val {
+                    duckdb::types::Value::Null => "NULL".to_string(),
+                    duckdb::types::Value::Boolean(b) => b.to_string(),
+                    duckdb::types::Value::TinyInt(n) => n.to_string(),
+                    duckdb::types::Value::SmallInt(n) => n.to_string(),
+                    duckdb::types::Value::Int(n) => n.to_string(),
+                    duckdb::types::Value::BigInt(n) => n.to_string(),
+                    duckdb::types::Value::Float(n) => n.to_string(),
+                    duckdb::types::Value::Double(n) => n.to_string(),
+                    duckdb::types::Value::Text(s) => s,
+                    _ => format!("{:?}", val),
+                };
+                row_data.push(s);
+            }
+            results.push(row_data);
+        }
+
+        Ok(results)
     }
 }
 

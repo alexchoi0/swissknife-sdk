@@ -100,3 +100,48 @@ impl MemoryConfig {
         self
     }
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaudePrompt {
+    pub id: String,
+    pub display: String,
+    pub timestamp: i64,
+    pub project: Option<String>,
+    pub session_id: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaudeMessage {
+    pub id: String,
+    pub uuid: String,
+    pub parent_uuid: Option<String>,
+    pub session_id: String,
+    pub message_type: String,
+    pub timestamp: String,
+    pub role: Option<String>,
+    pub content: Option<String>,
+    pub thinking: Option<String>,
+    pub tool_use: Option<String>,
+    pub cwd: Option<String>,
+    pub git_branch: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaudeTodo {
+    pub id: String,
+    pub session_id: String,
+    pub agent_id: String,
+    pub content: String,
+    pub status: String,
+    pub active_form: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ClaudeToolUse {
+    pub id: String,
+    pub name: String,
+    pub input: serde_json::Value,
+}

@@ -28,6 +28,10 @@ pub struct Cli {
     /// Custom config file path
     #[arg(short, long, global = true)]
     pub config: Option<PathBuf>,
+
+    /// Model to use (e.g., haiku, sonnet, opus, or full model ID)
+    #[arg(short, long, global = true)]
+    pub model: Option<String>,
 }
 
 #[derive(Subcommand)]
@@ -51,6 +55,16 @@ pub enum Commands {
     Mcp {
         #[command(subcommand)]
         command: McpCommands,
+    },
+    /// Import Claude Code history into memory
+    Import {
+        #[command(subcommand)]
+        command: ImportCommands,
+    },
+    /// Query Claude Code history
+    History {
+        #[command(subcommand)]
+        command: HistoryCommands,
     },
 }
 
@@ -125,5 +139,58 @@ pub enum McpCommands {
     Remove {
         /// Name or partial match of server to remove
         name: String,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum ImportCommands {
+    /// Import from ~/.claude/ history
+    Claude {
+        /// Only import from specific project path
+        #[arg(short, long)]
+        project: Option<String>,
+
+        /// Limit number of prompts to import (omit for unlimited)
+        #[arg(short, long)]
+        limit: Option<usize>,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum HistoryCommands {
+    /// Search prompts by text
+    Search {
+        /// Search query
+        query: String,
+
+        /// Limit results
+        #[arg(short, long, default_value = "20")]
+        limit: usize,
+    },
+    /// List recent prompts
+    Prompts {
+        /// Filter by project path
+        #[arg(short, long)]
+        project: Option<String>,
+
+        /// Limit results
+        #[arg(short, long, default_value = "20")]
+        limit: usize,
+    },
+    /// List messages from a session
+    Messages {
+        /// Session ID (or prefix)
+        session_id: String,
+
+        /// Limit results
+        #[arg(short, long, default_value = "50")]
+        limit: usize,
+    },
+    /// Show statistics
+    Stats,
+    /// Run raw SQL query
+    Sql {
+        /// SQL query to execute
+        query: String,
     },
 }

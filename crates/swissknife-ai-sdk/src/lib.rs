@@ -12,6 +12,9 @@ pub mod mcp;
 #[cfg(feature = "duckdb")]
 pub mod memory;
 
+#[cfg(feature = "duckdb")]
+pub mod claude_history;
+
 pub use error::{Error, Result};
 pub use registry::ToolRegistry;
 pub use tool::{Tool, ToolBuilder};

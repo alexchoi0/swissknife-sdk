@@ -305,7 +305,8 @@ mod tests {
     #[test]
     fn test_validate_and_open_regular_file() {
         let temp = TempDir::new().unwrap();
-        let file_path = temp.path().join("test.txt");
+        let canonical_temp = temp.path().canonicalize().unwrap();
+        let file_path = canonical_temp.join("test.txt");
         fs::write(&file_path, "test content").unwrap();
 
         init_sensitive_inodes();
@@ -317,7 +318,8 @@ mod tests {
     #[test]
     fn test_validate_and_open_blocked_path() {
         let temp = TempDir::new().unwrap();
-        let git_path = temp.path().join(".git");
+        let canonical_temp = temp.path().canonicalize().unwrap();
+        let git_path = canonical_temp.join(".git");
         fs::create_dir(&git_path).unwrap();
         let file_path = git_path.join("config");
         fs::write(&file_path, "test").unwrap();
@@ -332,10 +334,11 @@ mod tests {
     #[cfg(unix)]
     fn test_symlink_blocked() {
         let temp = TempDir::new().unwrap();
-        let real_file = temp.path().join("real.txt");
+        let canonical_temp = temp.path().canonicalize().unwrap();
+        let real_file = canonical_temp.join("real.txt");
         fs::write(&real_file, "content").unwrap();
 
-        let symlink_path = temp.path().join("link.txt");
+        let symlink_path = canonical_temp.join("link.txt");
         std::os::unix::fs::symlink(&real_file, &symlink_path).unwrap();
 
         init_sensitive_inodes();

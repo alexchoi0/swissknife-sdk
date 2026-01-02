@@ -42,7 +42,12 @@ pub fn handle_import_command(command: &ImportCommands, memory: &DuckDBMemory) {
 
                         match memory.add_claude_prompt(&db_prompt) {
                             Ok(_) => imported += 1,
-                            Err(_) => skipped += 1,
+                            Err(e) => {
+                                if std::env::var("SECRETARY_DEBUG").is_ok() {
+                                    eprintln!("  Skipped prompt: {}", e);
+                                }
+                                skipped += 1;
+                            }
                         }
                     }
 
@@ -121,11 +126,21 @@ pub fn handle_import_command(command: &ImportCommands, memory: &DuckDBMemory) {
 
                                     match memory.add_claude_message(&db_msg) {
                                         Ok(_) => total_messages += 1,
-                                        Err(_) => total_skipped += 1,
+                                        Err(e) => {
+                                            if std::env::var("SECRETARY_DEBUG").is_ok() {
+                                                eprintln!("  Skipped message: {}", e);
+                                            }
+                                            total_skipped += 1;
+                                        }
                                     }
                                 }
                             }
-                            Err(_) => continue,
+                            Err(e) => {
+                                if std::env::var("SECRETARY_DEBUG").is_ok() {
+                                    eprintln!("  Skipped session {}: {}", session_id, e);
+                                }
+                                continue;
+                            }
                         }
                     }
 

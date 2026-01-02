@@ -3,7 +3,6 @@ mod chat;
 mod cli;
 mod commands;
 mod config;
-mod db;
 mod error;
 mod format;
 mod security;
@@ -34,25 +33,6 @@ async fn main() {
 
     let config = apply_cli_overrides(config, &cli);
 
-    match &cli.command {
-        None => run_chat(&cli, config, None).await,
-        Some(Commands::Chat { command }) => {
-            let session_id = match command {
-                Some(ChatCommands::New) => Some(Uuid::new_v4().to_string()),
-                Some(ChatCommands::Resume { id }) => Some(id.clone()),
-                None => None,
-            };
-            run_chat(&cli, config, session_id).await;
-        }
-        Some(Commands::Sessions { command }) => commands::handle_sessions_command(command),
-        Some(Commands::Config { command }) => handle_config_command(command, &config),
-        Some(Commands::Mcp { command }) => handle_mcp_command(command),
-        Some(Commands::Import { command }) => commands::handle_import_command(command),
-        Some(Commands::History { command }) => commands::handle_history_command(command),
-    }
-}
-
-async fn run_chat(cli: &Cli, config: Config, session_id: Option<String>) {
     let app = match App::new(config.clone()) {
         Ok(app) => app,
         Err(e) => {
@@ -61,6 +41,25 @@ async fn run_chat(cli: &Cli, config: Config, session_id: Option<String>) {
         }
     };
 
+    match &cli.command {
+        None => run_chat(&cli, config, None, app).await,
+        Some(Commands::Chat { command }) => {
+            let session_id = match command {
+                Some(ChatCommands::New) => Some(Uuid::new_v4().to_string()),
+                Some(ChatCommands::Resume { id }) => Some(id.clone()),
+                None => None,
+            };
+            run_chat(&cli, config, session_id, app).await;
+        }
+        Some(Commands::Sessions { command }) => commands::handle_sessions_command(command, &app.memory),
+        Some(Commands::Config { command }) => handle_config_command(command, &config),
+        Some(Commands::Mcp { command }) => handle_mcp_command(command),
+        Some(Commands::Import { command }) => commands::handle_import_command(command, &app.memory),
+        Some(Commands::History { command }) => commands::handle_history_command(command, &app.memory),
+    }
+}
+
+async fn run_chat(cli: &Cli, config: Config, session_id: Option<String>, app: App) {
     let builtin_tools = config.tools.builtin && !cli.no_builtin;
     let sdk_tools = config.tools.sdk && !cli.no_sdk;
 

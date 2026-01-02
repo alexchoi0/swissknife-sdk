@@ -1,16 +1,8 @@
 use crate::cli::SessionsCommands;
-use crate::db::get_memory;
 use crate::format::{format_action_type, format_session, truncate, PREVIEW_LONG};
+use swissknife_ai_sdk::memory::DuckDBMemory;
 
-pub fn handle_sessions_command(command: &SessionsCommands) {
-    let memory = match get_memory() {
-        Ok(m) => m,
-        Err(e) => {
-            eprintln!("Error: {}", e);
-            std::process::exit(1);
-        }
-    };
-
+pub fn handle_sessions_command(command: &SessionsCommands, memory: &DuckDBMemory) {
     match command {
         SessionsCommands::List { limit } => {
             match memory.list_sessions(*limit) {

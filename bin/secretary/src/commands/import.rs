@@ -1,19 +1,10 @@
 use crate::cli::ImportCommands;
-use crate::db::get_memory;
 use chrono::Utc;
 use swissknife_ai_sdk::claude_history::{discover_sessions, parse_session_jsonl, ClaudeHistoryImporter};
-use swissknife_ai_sdk::memory::{ClaudeMessage as DbClaudeMessage, ClaudePrompt as DbClaudePrompt};
+use swissknife_ai_sdk::memory::{ClaudeMessage as DbClaudeMessage, ClaudePrompt as DbClaudePrompt, DuckDBMemory};
 use uuid::Uuid;
 
-pub fn handle_import_command(command: &ImportCommands) {
-    let memory = match get_memory() {
-        Ok(m) => m,
-        Err(e) => {
-            eprintln!("Error: {}", e);
-            std::process::exit(1);
-        }
-    };
-
+pub fn handle_import_command(command: &ImportCommands, memory: &DuckDBMemory) {
     match command {
         ImportCommands::Claude { project, limit } => {
             let importer = ClaudeHistoryImporter::new(memory.clone());

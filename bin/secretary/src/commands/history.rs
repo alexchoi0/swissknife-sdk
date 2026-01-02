@@ -1,16 +1,8 @@
 use crate::cli::HistoryCommands;
-use crate::db::get_memory;
 use crate::format::{format_timestamp, truncate, PREVIEW_SHORT};
+use swissknife_ai_sdk::memory::DuckDBMemory;
 
-pub fn handle_history_command(command: &HistoryCommands) {
-    let memory = match get_memory() {
-        Ok(m) => m,
-        Err(e) => {
-            eprintln!("Error: {}", e);
-            std::process::exit(1);
-        }
-    };
-
+pub fn handle_history_command(command: &HistoryCommands, memory: &DuckDBMemory) {
     match command {
         HistoryCommands::Search { query, limit } => {
             match memory.search_claude_prompts(query, *limit) {
